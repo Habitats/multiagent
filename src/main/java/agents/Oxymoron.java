@@ -1,4 +1,4 @@
-package oxymoron;
+package agents;
 
 
 import java.util.Collections;
