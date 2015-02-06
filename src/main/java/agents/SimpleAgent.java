@@ -15,8 +15,41 @@ import jade.lang.acl.ACLMessage;
  */
 public abstract class SimpleAgent extends Agent {
 
+
   @Override
   protected void setup() {
+    registerWithYellowPages();
+
+    System.out.println(getAID().getLocalName() + " representin'!");
+    addBehaviour(new CyclicBehaviour() {
+      @Override
+      public void action() {
+        ACLMessage msg = myAgent.receive();
+        if (msg == null) {
+          return;
+        }
+
+        if (msg.getConversationId() != null && msg.getConversationId().equalsIgnoreCase("math-problem")) {
+          System.out.println("I can solve this! agents.Problem: " + msg.getContent());
+          problemReceived(msg);
+        } else {
+          System.out.println(getAID().getLocalName() + " received a message!");
+          broadcastReceived(msg);
+        }
+
+        block();
+      }
+    });
+
+    addBehaviour(new OneShotBehaviour() {
+      @Override
+      public void action() {
+        broadcastMessage("go go go");
+      }
+    });
+  }
+
+  private void registerWithYellowPages() {
     addBehaviour(new OneShotBehaviour() {
       @Override
       public void action() {
@@ -32,33 +65,6 @@ public abstract class SimpleAgent extends Agent {
         } catch (FIPAException fe) {
           fe.printStackTrace();
         }
-      }
-    });
-    System.out.println(getAID().getLocalName() + " representin'!");
-    addBehaviour(new CyclicBehaviour() {
-      @Override
-      public void action() {
-        ACLMessage msg = myAgent.receive();
-        if (msg == null) {
-          return;
-        }
-
-        if (msg.getConversationId() != null && msg.getConversationId().equalsIgnoreCase("math-problem")) {
-          System.out.println("I can solve this! Problem: " + msg.getContent());
-          problemReceived(msg);
-        } else {
-          System.out.println(getAID().getLocalName() + " received a message!");
-          broadcastReceived(msg);
-        }
-
-        block();
-      }
-    });
-
-    addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        broadcastMessage("go go go");
       }
     });
   }

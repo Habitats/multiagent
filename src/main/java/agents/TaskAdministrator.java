@@ -1,6 +1,9 @@
 package agents;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,49 +22,63 @@ import jade.lang.acl.ACLMessage;
  */
 public class TaskAdministrator extends Agent {
 
+  Deque<Problem> problems = new ArrayDeque<>();
 
   @Override
   protected void setup() {
     // Printout a welcome message
     System.out.println("Hello! Buyer-agent " + getAID().getName() + " is ready.");
+
+    // if no args, create dummy problems
     Object[] args = getArguments();
     if (args == null || args.length == 0) {
-      String problem = "+ * 5 2 - 7 2";
-      System.out.println("Trying to solve:" + problem);
-      addBehaviour(new TickerBehaviour(this, 10000) {
-        protected void onTick() {
-          DFAgentDescription template = new DFAgentDescription();
-          ServiceDescription sd = new ServiceDescription();
-          sd.setType("math-solver");
-          template.addServices(sd);
-
-          try {
-            List<DFAgentDescription> result = Arrays.asList(DFService.search(myAgent, template));
-            List<AID> sellerAgents = result.stream().map(res -> res.getName()).collect(Collectors.toList());
-
-            addBehaviour(new OneShotBehaviour() {
-              @Override
-              public void action() {
-                ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-                cfp.setContent(problem);
-                sellerAgents.forEach(agent -> cfp.addReceiver(agent));
-
-                cfp.setContent(problem);
-                cfp.setConversationId("math-problem");
-
-                TaskAdministrator.this.send(cfp);
-              }
-            });
-          } catch (FIPAException fe) {
-            fe.printStackTrace();
-          }
-
-
-        }
-      });
-
-
+      System.out.println("Adding some dummy problems ...");
+      problems.add(new Problem("+ - 3 9 * 5 1"));
+      problems.add(new Problem("+ * 5 2 - 7 2"));
     }
+
+    problems.forEach(problem -> addBehaviour(new TickerBehaviour(this, 10000) {
+      protected void onTick() {
+
+        List<AID> sellerAgents = getAgentIds();
+        Problem problem = problems.removeFirst();
+        while (!problem.isTerminal()) {
+          Problem subProblem = problem.getSubproblem();
+          addBehaviour(composeProblemMessage(sellerAgents, subProblem));
+        }
+      }
+
+    }));
+
+  }
+
+  private OneShotBehaviour composeProblemMessage(final List<AID> sellerAgents, final Problem problem) {
+    return new OneShotBehaviour() {
+      @Override
+      public void action() {
+        ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+        sellerAgents.forEach(agent -> cfp.addReceiver(agent));
+
+        cfp.setContent(problem.toString());
+        cfp.setConversationId("math-problem");
+
+        TaskAdministrator.this.send(cfp);
+      }
+    };
+  }
+
+  private List<AID> getAgentIds() {
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType("math-solver");
+    DFAgentDescription template = new DFAgentDescription();
+    template.addServices(sd);
+    List<DFAgentDescription> result = null;
+    try {
+      result = Arrays.asList(DFService.search(this, template));
+    } catch (FIPAException e) {
+      result = new ArrayList<>();
+    }
+    return result.stream().map(res -> res.getName()).collect(Collectors.toList());
   }
 
   @Override
