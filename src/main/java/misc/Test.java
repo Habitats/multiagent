@@ -1,4 +1,4 @@
-import agents.Problem;
+package misc;
 
 /**
  * Created by Patrick on 06.02.2015.
@@ -14,14 +14,11 @@ public class Test {
 
 //  sub.solve("2");
 
-    Problem sub = p.getSubproblem();
 
     while (!p.isSolved()) {
+      Problem sub = p.getSubproblem();
       sub.solve();
       System.out.println(p);
-      if (!p.isSolved()) {
-        sub = p.getSubproblem();
-      }
     }
   }
 }

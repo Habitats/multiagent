@@ -30,7 +30,7 @@ public abstract class SimpleAgent extends Agent {
         }
 
         if (msg.getConversationId() != null && msg.getConversationId().equalsIgnoreCase("math-problem")) {
-          System.out.println("I can solve this! agents.Problem: " + msg.getContent());
+          System.out.println("I can solve this! Problem: " + msg.getContent());
           problemReceived(msg);
         } else {
           System.out.println(getAID().getLocalName() + " received a message!");

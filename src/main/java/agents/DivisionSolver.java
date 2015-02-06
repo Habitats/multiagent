@@ -10,7 +10,7 @@ public class DivisionSolver extends SimpleAgent {
 
   @Override
   protected void problemReceived(ACLMessage msg) {
-
+    System.out.println("you");
   }
 
   @Override
