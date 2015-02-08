@@ -17,7 +17,7 @@ public class Problem {
 
 
   public Problem(String problem) {
-    this(Arrays.asList(problem.split(" ")).stream().collect(Collectors.toList()), null);
+    this(Arrays.asList(problem.trim().split(" ")).stream().collect(Collectors.toList()), null);
   }
 
   private Problem(List<String> subProblem, Problem problem) {
@@ -71,7 +71,7 @@ public class Problem {
 
   @Override
   public String toString() {
-    return value.toString() + (isTerminal ? "" : left.toString() + right.toString());
+    return value.toString() + " " + (isTerminal ? "" : left.toString() + right.toString());
   }
 
   public void solve() {

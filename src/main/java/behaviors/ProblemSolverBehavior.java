@@ -19,7 +19,8 @@ import misc.Problem;
  */
 public class ProblemSolverBehavior extends Behaviour {
 
-  private boolean isDone = false;
+  private int bestTime = Integer.MAX_VALUE;
+  private long announceTime;
 
   private enum State {
     ANNOUNCE, RECEIVE_PROPOSAL, WAITING_FOR_SOLUTION, DONE,
@@ -44,9 +45,6 @@ public class ProblemSolverBehavior extends Behaviour {
       case WAITING_FOR_SOLUTION:
         processSolution();
         break;
-      case DONE:
-        isDone = true;
-        break;
     }
     block();
   }
@@ -63,21 +61,33 @@ public class ProblemSolverBehavior extends Behaviour {
     myAgent.send(cfp);
 
     currentState = State.RECEIVE_PROPOSAL;
+
+    announceTime = System.currentTimeMillis();
   }
 
   private void evaluateProposal() {
     ACLMessage reply = myAgent.receive();
     if (reply != null && reply.getPerformative() == ACLMessage.PROPOSE) {
+      int finishTime = Integer.parseInt(reply.getContent());
+
+      if (finishTime > bestTime) {
+        return;
+      }
+
+      // this is the best bid
+      bestTime = finishTime;
+
       AID bestChoice = reply.getSender();
-      currentState = State.WAITING_FOR_SOLUTION;
 
       ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
       accept.addReceiver(bestChoice);
       accept.setContent(problem.toString());
       myAgent.send(accept);
+      System.out.println(bestChoice.getLocalName() + " is chosen as the winner! Requesting a solution ...");
+
+      currentState = State.WAITING_FOR_SOLUTION;
     }
   }
-
 
   private void processSolution() {
     ACLMessage reply = myAgent.receive();
@@ -89,7 +99,7 @@ public class ProblemSolverBehavior extends Behaviour {
 
   @Override
   public boolean done() {
-    return isDone;
+    return currentState == State.DONE;
   }
 
   private List<AID> getAgentIds() {

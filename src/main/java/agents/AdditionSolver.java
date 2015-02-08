@@ -1,6 +1,7 @@
 package agents;
 
 import jade.lang.acl.ACLMessage;
+import misc.Problem;
 
 /**
  * Created by anon on 04.02.2015.
@@ -8,13 +9,12 @@ import jade.lang.acl.ACLMessage;
 public class AdditionSolver extends SimpleAgent {
 
   @Override
-  protected void setup() {
-    super.setup();
+  protected int getExecutionEstimate(String content) {
+    return 2;
   }
 
   @Override
-  protected void problemReceived(ACLMessage msg) {
-
+  protected void problemReceived(Problem problem) {
   }
 
   @Override
@@ -25,10 +25,5 @@ public class AdditionSolver extends SimpleAgent {
   @Override
   void broadcastReceived(ACLMessage msg) {
 
-  }
-
-  @Override
-  protected void takeDown() {
-    super.takeDown();
   }
 }
