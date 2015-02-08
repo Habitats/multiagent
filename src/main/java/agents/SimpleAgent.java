@@ -1,6 +1,5 @@
 package agents;
 
-import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -55,12 +54,6 @@ public abstract class SimpleAgent extends Agent {
       }
     });
 
-//    addBehaviour(new OneShotBehaviour() {
-//      @Override
-//      public void action() {
-//        broadcastMessage("go go go");
-//      }
-//    });
   }
 
   protected String id() {
@@ -95,18 +88,6 @@ public abstract class SimpleAgent extends Agent {
 
 
   protected abstract String getServiceName();
-
-  private void broadcastMessage(String content) {
-    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-    msg.addReceiver(new AID("oxy", AID.ISLOCALNAME));
-    msg.setLanguage("English");
-    msg.setOntology("duck-dock-go");
-    msg.setContent(content);
-    send(msg);
-    System.out.println(id() + "broadcasting message!");
-  }
-
-  abstract void broadcastReceived(ACLMessage msg);
 
 
   @Override

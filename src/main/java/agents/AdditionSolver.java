@@ -1,6 +1,5 @@
 package agents;
 
-import jade.lang.acl.ACLMessage;
 import misc.Problem;
 
 /**
@@ -22,8 +21,4 @@ public class AdditionSolver extends SimpleAgent {
     return "add";
   }
 
-  @Override
-  void broadcastReceived(ACLMessage msg) {
-
-  }
 }

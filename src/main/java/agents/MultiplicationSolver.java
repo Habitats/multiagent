@@ -25,9 +25,5 @@ public class MultiplicationSolver extends SimpleAgent {
     return "multi";
   }
 
-  @Override
-  void broadcastReceived(ACLMessage msg) {
-
-  }
 
 }

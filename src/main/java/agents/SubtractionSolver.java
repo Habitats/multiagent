@@ -23,9 +23,6 @@ public class SubtractionSolver extends SimpleAgent {
     return "sub";
   }
 
-  @Override
-  void broadcastReceived(ACLMessage msg) {
 
-  }
 
 }

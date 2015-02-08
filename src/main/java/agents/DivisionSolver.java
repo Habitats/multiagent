@@ -23,8 +23,4 @@ public class DivisionSolver extends SimpleAgent {
     return "div";
   }
 
-  @Override
-  void broadcastReceived(ACLMessage msg) {
-
-  }
 }
