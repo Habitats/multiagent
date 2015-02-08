@@ -1,6 +1,5 @@
 package agents;
 
-import jade.lang.acl.ACLMessage;
 import misc.Problem;
 
 /**
@@ -15,14 +14,12 @@ public class SubtractionSolver extends SimpleAgent {
 
   @Override
   protected void problemReceived(Problem problem) {
-
+    problem.solve();
+    System.out.println(id() + problem + " solved!");
   }
 
   @Override
   protected String getServiceName() {
-    return "sub";
+    return Operator.SUBTRACTION.get();
   }
-
-
-
 }

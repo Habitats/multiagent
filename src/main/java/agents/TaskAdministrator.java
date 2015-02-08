@@ -3,7 +3,7 @@ package agents;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import behaviors.SubProblemSolverBehavior;
+import behaviors.ProblemSplitterBehavior;
 import jade.core.Agent;
 import misc.Problem;
 
@@ -11,6 +11,8 @@ import misc.Problem;
  * Created by anon on 04.02.2015.
  */
 public class TaskAdministrator extends Agent {
+
+  public static final String SERVICE_PREFIX = "math-solver";
 
   Deque<Problem> problems = new ArrayDeque<>();
 
@@ -31,7 +33,7 @@ public class TaskAdministrator extends Agent {
     problems.forEach(p -> {
       p = problems.removeFirst();
       System.out.println("Announcing problem: " + p);
-      addBehaviour(new SubProblemSolverBehavior(p));
+      addBehaviour(new ProblemSplitterBehavior(p));
     });
 
   }

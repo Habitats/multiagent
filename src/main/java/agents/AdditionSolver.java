@@ -14,11 +14,13 @@ public class AdditionSolver extends SimpleAgent {
 
   @Override
   protected void problemReceived(Problem problem) {
+    problem.solve();
+    System.out.println(id() + problem + " solved!");
   }
 
   @Override
   protected String getServiceName() {
-    return "add";
+    return Operator.ADDITION.get();
   }
 
 }

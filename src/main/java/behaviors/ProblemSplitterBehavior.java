@@ -6,7 +6,7 @@ import misc.Problem;
 /**
  * Created by anon on 08.02.2015.
  */
-public class SubProblemSolverBehavior extends Behaviour {
+public class ProblemSplitterBehavior extends Behaviour {
 
 
   private enum State {
@@ -15,10 +15,10 @@ public class SubProblemSolverBehavior extends Behaviour {
 
   private State state = State.READY;
   private final Problem problem;
-  private ProblemSolverBehavior problemSolverBehavior;
+  private ProblemDelegatorBehavior problemDelegatorBehavior;
   private final String problemDescription;
 
-  public SubProblemSolverBehavior(Problem problem) {
+  public ProblemSplitterBehavior(Problem problem) {
     this.problem = problem;
     problemDescription = problem.toString();
   }
@@ -30,13 +30,13 @@ public class SubProblemSolverBehavior extends Behaviour {
       case READY:
         Problem subProblem = problem.getSubproblem();
         System.out.println("Requesting solving of subproblem: " + subProblem);
-        problemSolverBehavior = new ProblemSolverBehavior(subProblem);
-        myAgent.addBehaviour(problemSolverBehavior);
+        problemDelegatorBehavior = new ProblemDelegatorBehavior(subProblem);
+        myAgent.addBehaviour(problemDelegatorBehavior);
 
         state = State.WAITING_FOR_ANSWER;
         break;
       case WAITING_FOR_ANSWER:
-        if (problemSolverBehavior.done()) {
+        if (problemDelegatorBehavior.done()) {
           System.out.println("Partial problem solved ...");
           state = State.PARTIALLY_SOLVED;
         }

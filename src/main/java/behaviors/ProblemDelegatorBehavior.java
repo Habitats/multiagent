@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import agents.TaskAdministrator;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
@@ -17,7 +18,7 @@ import misc.Problem;
 /**
  * Created by Patrick on 06.02.2015.
  */
-public class ProblemSolverBehavior extends Behaviour {
+public class ProblemDelegatorBehavior extends Behaviour {
 
   private int bestTime = Integer.MAX_VALUE;
   private long announceTime;
@@ -29,7 +30,7 @@ public class ProblemSolverBehavior extends Behaviour {
   private State currentState = State.ANNOUNCE;
   private Problem problem;
 
-  public ProblemSolverBehavior(Problem problem) {
+  public ProblemDelegatorBehavior(Problem problem) {
     this.problem = problem;
   }
 
@@ -50,13 +51,13 @@ public class ProblemSolverBehavior extends Behaviour {
   }
 
   private void announceProblem() {
-    List<AID> sellerAgents = getAgentIds();
+    List<AID> sellerAgents = getAgentIds(problem);
 
     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
     sellerAgents.forEach(agent -> cfp.addReceiver(agent));
 
     cfp.setContent(problem.toString());
-    cfp.setConversationId("math-problem");
+    cfp.setConversationId("math-problem_" + System.currentTimeMillis());
 
     myAgent.send(cfp);
 
@@ -102,9 +103,9 @@ public class ProblemSolverBehavior extends Behaviour {
     return currentState == State.DONE;
   }
 
-  private List<AID> getAgentIds() {
+  private List<AID> getAgentIds(Problem problem) {
     ServiceDescription sd = new ServiceDescription();
-    sd.setType("math-solver");
+    sd.setType(TaskAdministrator.SERVICE_PREFIX + problem.getType());
     DFAgentDescription template = new DFAgentDescription();
     template.addServices(sd);
     List<DFAgentDescription> result;

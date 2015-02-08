@@ -69,6 +69,10 @@ public class Problem {
     isTerminal = true;
   }
 
+  public String getType() {
+    return isOperator(value) ? value : null;
+  }
+
   @Override
   public String toString() {
     return value.toString() + " " + (isTerminal ? "" : left.toString() + right.toString());

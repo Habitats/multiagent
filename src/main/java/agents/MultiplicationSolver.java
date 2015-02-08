@@ -1,6 +1,5 @@
 package agents;
 
-import jade.lang.acl.ACLMessage;
 import misc.Problem;
 
 /**
@@ -8,10 +7,9 @@ import misc.Problem;
  */
 public class MultiplicationSolver extends SimpleAgent {
 
-
   @Override
   protected int getExecutionEstimate(String content) {
-    return 2;
+    return (int) (Math.random() * 1000);
   }
 
   @Override
@@ -22,7 +20,7 @@ public class MultiplicationSolver extends SimpleAgent {
 
   @Override
   protected String getServiceName() {
-    return "multi";
+    return Operator.MULTIPLICATION.get();
   }
 
 

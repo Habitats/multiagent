@@ -1,6 +1,5 @@
 package agents;
 
-import jade.lang.acl.ACLMessage;
 import misc.Problem;
 
 /**
@@ -15,12 +14,13 @@ public class DivisionSolver extends SimpleAgent {
 
   @Override
   protected void problemReceived(Problem problem) {
-    System.out.println("you");
+    problem.solve();
+    System.out.println(id() + problem + " solved!");
   }
 
   @Override
   protected String getServiceName() {
-    return "div";
+    return Operator.DIVISION.get();
   }
 
 }
