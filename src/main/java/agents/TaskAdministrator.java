@@ -11,13 +11,14 @@ import misc.Log;
 import misc.Problem;
 
 /**
- * Created by anon on 04.02.2015.
+ * The TaskAdministrator class is the brain of the problem solving process. It decomposes problems into subproblems,
+ * that can easily be solved by simpler agents.
  */
 public class TaskAdministrator extends Agent {
 
   public static final String SERVICE_PREFIX = "math-solver";
 
-  Deque<Problem> problems = new ArrayDeque<>();
+  private Deque<Problem> problems = new ArrayDeque<>();
 
   @Override
   protected void setup() {
@@ -29,14 +30,11 @@ public class TaskAdministrator extends Agent {
   }
 
   private void addSampleProblems() {
-    // if no args, create dummy problems
-    Object[] args = getArguments();
-    if (args == null || args.length == 0) {
-      Log.v(getTag(), "Adding some dummy problems ...");
+    // create some dummy problems for easy testing
+    Log.v(getTag(), "Adding some dummy problems ...");
 
-      for (int i = 0; i < 3; i++) {
-        problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
-      }
+    for (int i = 0; i < 3; i++) {
+      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
     }
 
     problems.forEach(p -> {
@@ -69,7 +67,7 @@ public class TaskAdministrator extends Agent {
 
   @Override
   protected void takeDown() {
-    super.takeDown();
+    Log.v(getTag(), "Shutting down!");
   }
 
 

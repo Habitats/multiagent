@@ -18,7 +18,9 @@ import misc.Log;
 import misc.Problem;
 
 /**
- * Created by Patrick on 06.02.2015.
+ * This behavior delegates and sends the trivial sub problems to agents for solving. It also handles auctions and
+ * bidding, and will issue the next sub problem to the agent with the lowest bid, which is interpreted as the time it
+ * will take to solve a given problem.
  */
 public class ProblemDelegatorBehavior extends Behaviour {
 
@@ -68,7 +70,6 @@ public class ProblemDelegatorBehavior extends Behaviour {
 
     currentState = State.RECEIVE_PROPOSAL;
   }
-
 
   private void evaluateProposal() {
     ACLMessage msg = myAgent.receive();
@@ -131,7 +132,6 @@ public class ProblemDelegatorBehavior extends Behaviour {
   private String generateConversationId() {
     return TaskAdministrator.SERVICE_PREFIX + System.currentTimeMillis() + Math.random();
   }
-
 
   private List<AID> getAgentIds(Problem problem) {
     ServiceDescription sd = new ServiceDescription();

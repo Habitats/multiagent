@@ -17,7 +17,7 @@ import misc.Log;
 import misc.Problem;
 
 /**
- * Created by anon on 04.02.2015.
+ * This is an abstract solver agent which inherits most of the functionality for the simple solver agents.
  */
 public abstract class AbstractSolverAgent extends Agent {
 
@@ -59,8 +59,6 @@ public abstract class AbstractSolverAgent extends Agent {
 
         block();
       }
-
-
     });
   }
 
@@ -128,6 +126,10 @@ public abstract class AbstractSolverAgent extends Agent {
     Log.v(getTag(), "Going down!");
   }
 
+  /**
+   * An internal class for a behavior for actually solving a sub problem. An agent can have multiple instances of this
+   * behavior at the same time, for several sub problems it is solving. Thus, an object with a state is required.
+   */
   private class ProblemSolverBehavior extends WakerBehaviour {
 
     private final String conversationId;

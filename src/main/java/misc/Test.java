@@ -1,8 +1,6 @@
 package misc;
 
 /**
- * Created by Patrick on 06.02.2015.
- *
  * Simple test to check that the prefix calculator tree thingy actually works
  */
 public class Test {
@@ -13,7 +11,6 @@ public class Test {
     System.out.println(p);
 
 //  sub.solve("2");
-
 
     while (!p.isSolved()) {
       Problem sub = p.getSubproblem();

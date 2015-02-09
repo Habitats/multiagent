@@ -6,7 +6,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 
 /**
- * Created by Patrick on 23.08.2014.
+ * Helper class for logging.
  */
 public class Log {
 

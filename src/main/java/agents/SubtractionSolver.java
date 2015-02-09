@@ -4,7 +4,7 @@ import misc.Log;
 import misc.Problem;
 
 /**
- * Created by anon on 04.02.2015.
+ * A simple agent for executing subtraction
  */
 public class SubtractionSolver extends AbstractSolverAgent {
 

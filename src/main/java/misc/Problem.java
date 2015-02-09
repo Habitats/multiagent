@@ -5,23 +5,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by Patrick on 06.02.2015.
+ * A class designed to hold a problem, in this particular scenario it holds a arithmetic math problem in the pre-fix
+ * format.
+ *
+ * The class follows the composite pattern laid out as a tree structure. Calling "getSubProblem" on this class will
+ * automatically recursively retrieve the first possible sub problem that can be solved explicitly.
  */
 public class Problem {
 
-  private final Problem parent;
   private boolean isTerminal = false;
-  private Problem left;
-  private Problem right;
+  private Problem leftChild;
+  private Problem rightChild;
   private String value;
 
-
   public Problem(String problem) {
-    this(Arrays.asList(problem.trim().split(" ")).stream().collect(Collectors.toList()), null);
+    this(Arrays.asList(problem.trim().split(" ")).stream().collect(Collectors.toList()));
   }
 
-  private Problem(List<String> subProblem, Problem problem) {
-    this.parent = problem;
+  private Problem(List<String> subProblem) {
     value = subProblem.remove(0);
 
     if (!isOperator(value)) {
@@ -29,33 +30,21 @@ public class Problem {
       return;
     }
 
-    left = new Problem(subProblem, this);
-    right = new Problem(subProblem, this);
+    leftChild = new Problem(subProblem);
+    rightChild = new Problem(subProblem);
   }
 
   private boolean isOperator(String s) {
     return s.matches("[+-/\\*]");
   }
 
-  public Problem getLeft() {
-    return left;
-  }
-
-  public Problem getRight() {
-    return right;
-  }
-
   public String getValue() {
     return value;
   }
 
-  public boolean isTerminal() {
-    return isTerminal;
-  }
-
   public Problem getSubproblem() {
-    return left.isTerminal && !right.isTerminal ? right.getSubproblem() //
-                                                : left.isTerminal && right.isTerminal ? this : left.getSubproblem();
+    return leftChild.isTerminal && !rightChild.isTerminal ? rightChild.getSubproblem() :  //
+           leftChild.isTerminal && rightChild.isTerminal ? this : leftChild.getSubproblem();
   }
 
   public void solve(String answer) {
@@ -64,8 +53,8 @@ public class Problem {
   }
 
   private void setTerminal() {
-    right = null;
-    left = null;
+    rightChild = null;
+    leftChild = null;
     isTerminal = true;
   }
 
@@ -73,24 +62,19 @@ public class Problem {
     return isOperator(value) ? value : null;
   }
 
-  @Override
-  public String toString() {
-    return value.toString() + " " + (isTerminal ? "" : left.toString() + right.toString());
-  }
-
   public void solve() {
     switch (value.charAt(0)) {
       case '+':
-        value = String.valueOf(Integer.parseInt(left.value) + Integer.parseInt(right.value));
+        value = String.valueOf(Integer.parseInt(leftChild.value) + Integer.parseInt(rightChild.value));
         break;
       case '*':
-        value = String.valueOf(Integer.parseInt(left.value) * Integer.parseInt(right.value));
+        value = String.valueOf(Integer.parseInt(leftChild.value) * Integer.parseInt(rightChild.value));
         break;
       case '/':
-        value = String.valueOf(Integer.parseInt(left.value) / Integer.parseInt(right.value));
+        value = String.valueOf(Integer.parseInt(leftChild.value) / Integer.parseInt(rightChild.value));
         break;
       case '-':
-        value = String.valueOf(Integer.parseInt(left.value) - Integer.parseInt(right.value));
+        value = String.valueOf(Integer.parseInt(leftChild.value) - Integer.parseInt(rightChild.value));
         break;
     }
 
@@ -100,4 +84,10 @@ public class Problem {
   public boolean isSolved() {
     return Arrays.asList(value.toCharArray()).stream().noneMatch(c -> isOperator(String.valueOf(c)));
   }
+
+  @Override
+  public String toString() {
+    return value.toString() + " " + (isTerminal ? "" : leftChild.toString() + rightChild.toString());
+  }
+
 }

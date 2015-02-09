@@ -5,7 +5,9 @@ import misc.Log;
 import misc.Problem;
 
 /**
- * Created by anon on 08.02.2015.
+ * This behavior decomposes a more complex problem into smaller parts. After having split up the problem, it sends each
+ * of the sub problems to the delegator. It then proceeds to keep track of the overall solving process, and finally
+ * reports back the final solution.
  */
 public class ProblemSplitterBehavior extends Behaviour {
 
@@ -64,7 +66,6 @@ public class ProblemSplitterBehavior extends Behaviour {
       state = State.READY;
     }
   }
-
 
   @Override
   public boolean done() {
