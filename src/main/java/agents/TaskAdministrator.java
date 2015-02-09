@@ -25,11 +25,8 @@ public class TaskAdministrator extends Agent {
     Log.v(getTag(), "Hello! Buyer-agent " + getAID().getName() + " is ready.");
 
     addSampleProblems();
-
     enableQueryRefProcessing();
-
   }
-
 
   private void addSampleProblems() {
     // if no args, create dummy problems
@@ -37,7 +34,7 @@ public class TaskAdministrator extends Agent {
     if (args == null || args.length == 0) {
       Log.v(getTag(), "Adding some dummy problems ...");
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 3; i++) {
         problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
       }
     }

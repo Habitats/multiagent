@@ -6,7 +6,7 @@ import misc.Problem;
 /**
  * Created by anon on 04.02.2015.
  */
-public class SubtractionSolver extends SimpleAgent {
+public class SubtractionSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
@@ -21,7 +21,6 @@ public class SubtractionSolver extends SimpleAgent {
 
   @Override
   protected String getServiceName() {
-
     return Operator.SUBTRACTION.get();
   }
 

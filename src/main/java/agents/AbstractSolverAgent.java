@@ -19,7 +19,7 @@ import misc.Problem;
 /**
  * Created by anon on 04.02.2015.
  */
-public abstract class SimpleAgent extends Agent {
+public abstract class AbstractSolverAgent extends Agent {
 
   private int jobs = 0;
   private Map<String, Problem> problems = new HashMap<>();
@@ -51,28 +51,35 @@ public abstract class SimpleAgent extends Agent {
         }
 
         String conversationId = msg.getConversationId();
-
         if (msg.getPerformative() == ACLMessage.CFP) {
-          int executionEstimate = getExecutionEstimate(msg.getContent());
-          Log.v(getTag(), "I can solve this! Problem: " + msg.getContent() + " -- Bidding: " + executionEstimate);
-          ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
-          proposals.put(conversationId, executionEstimate);
-          problems.put(conversationId, new Problem(msg.getContent()));
-          reply.setContent(String.valueOf(executionEstimate));
-          reply.setConversationId(conversationId);
-          reply.addReceiver(msg.getSender());
-          myAgent.send(reply);
+          processCfp(msg, conversationId);
         } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && proposals.containsKey(conversationId)) {
-          Log.v(getTag(), "My proposal was accepted -- attempting to solve: " + problems.get(conversationId));
-          problemReceived(problems.get(conversationId));
-          addBehaviour(
-              new ProblemSolverBehavior(myAgent, proposals.get(conversationId), conversationId, msg.getSender()));
-
+          initiateProblemSolving(msg, conversationId);
         }
 
         block();
       }
+
+
     });
+  }
+
+  private void initiateProblemSolving(ACLMessage msg, String conversationId) {
+    Log.v(getTag(), "My proposal was accepted -- attempting to solve: " + problems.get(conversationId));
+    problemReceived(problems.get(conversationId));
+    addBehaviour(new ProblemSolverBehavior(this, proposals.get(conversationId), conversationId, msg.getSender()));
+  }
+
+  private void processCfp(ACLMessage msg, String conversationId) {
+    int executionEstimate = getExecutionEstimate(msg.getContent());
+    Log.v(getTag(), "I can solve this! Problem: " + msg.getContent() + " -- Bidding: " + executionEstimate);
+    ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
+    proposals.put(conversationId, executionEstimate);
+    problems.put(conversationId, new Problem(msg.getContent()));
+    reply.setContent(String.valueOf(executionEstimate));
+    reply.setConversationId(conversationId);
+    reply.addReceiver(msg.getSender());
+    send(reply);
   }
 
   public String getTag() {
@@ -97,7 +104,7 @@ public abstract class SimpleAgent extends Agent {
         Log.v(getTag(), "Registered with YellowPages!");
 
         try {
-          DFService.register(SimpleAgent.this, dfd);
+          DFService.register(AbstractSolverAgent.this, dfd);
         } catch (FIPAException fe) {
           fe.printStackTrace();
         }

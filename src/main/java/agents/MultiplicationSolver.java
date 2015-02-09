@@ -6,7 +6,7 @@ import misc.Problem;
 /**
  * Created by anon on 04.02.2015.
  */
-public class MultiplicationSolver extends SimpleAgent {
+public class MultiplicationSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {

@@ -22,6 +22,7 @@ import misc.Problem;
  */
 public class ProblemDelegatorBehavior extends Behaviour {
 
+  private static final int AUCTION_TIMEOUT = 1000;
   private int bestTime = Integer.MAX_VALUE;
   private AID bestChoice;
   private String conversationId;
@@ -60,13 +61,14 @@ public class ProblemDelegatorBehavior extends Behaviour {
     sellerAgents.forEach(agent -> cfp.addReceiver(agent));
 
     cfp.setContent(problem.toString());
-    conversationId = "math-problem_" + System.currentTimeMillis() + Math.random();
+    conversationId = generateConversationId();
     cfp.setConversationId(conversationId);
 
     myAgent.send(cfp);
 
     currentState = State.RECEIVE_PROPOSAL;
   }
+
 
   private void evaluateProposal() {
     ACLMessage msg = myAgent.receive();
@@ -85,7 +87,7 @@ public class ProblemDelegatorBehavior extends Behaviour {
       bestTime = finishTime;
       bestChoice = msg.getSender();
 
-      myAgent.addBehaviour(new WakerBehaviour(myAgent, 1000) {
+      myAgent.addBehaviour(new WakerBehaviour(myAgent, AUCTION_TIMEOUT) {
         @Override
         protected void handleElapsedTimeout() {
           currentState = State.WAITING_FOR_SOLUTION;
@@ -104,15 +106,6 @@ public class ProblemDelegatorBehavior extends Behaviour {
     }
   }
 
-  private boolean isValidPropose(ACLMessage msg) {
-    return msg.getPerformative() == ACLMessage.PROPOSE && msg.getConversationId().equalsIgnoreCase(conversationId);
-  }
-
-  private boolean isValidSolution(ACLMessage msg) {
-    return msg.getPerformative() == ACLMessage.INFORM && msg.getSender().getLocalName()
-        .equalsIgnoreCase(bestChoice.getLocalName()) && msg.getConversationId().equalsIgnoreCase(conversationId);
-  }
-
   private void processSolution() {
     ACLMessage msg = myAgent.receive();
     if (msg == null) {
@@ -126,10 +119,19 @@ public class ProblemDelegatorBehavior extends Behaviour {
     }
   }
 
-  @Override
-  public boolean done() {
-    return currentState == State.DONE;
+  private boolean isValidPropose(ACLMessage msg) {
+    return msg.getPerformative() == ACLMessage.PROPOSE && msg.getConversationId().equalsIgnoreCase(conversationId);
   }
+
+  private boolean isValidSolution(ACLMessage msg) {
+    return msg.getPerformative() == ACLMessage.INFORM && msg.getSender().getLocalName()
+        .equalsIgnoreCase(bestChoice.getLocalName()) && msg.getConversationId().equalsIgnoreCase(conversationId);
+  }
+
+  private String generateConversationId() {
+    return TaskAdministrator.SERVICE_PREFIX + System.currentTimeMillis() + Math.random();
+  }
+
 
   private List<AID> getAgentIds(Problem problem) {
     ServiceDescription sd = new ServiceDescription();
@@ -144,4 +146,10 @@ public class ProblemDelegatorBehavior extends Behaviour {
     }
     return result.stream().map(res -> res.getName()).collect(Collectors.toList());
   }
+
+  @Override
+  public boolean done() {
+    return currentState == State.DONE;
+  }
+
 }

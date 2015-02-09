@@ -6,7 +6,7 @@ import misc.Problem;
 /**
  * Created by anon on 04.02.2015.
  */
-public class DivisionSolver extends SimpleAgent {
+public class DivisionSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
