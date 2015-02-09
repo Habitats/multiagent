@@ -1,5 +1,6 @@
 package agents;
 
+import misc.Log;
 import misc.Problem;
 
 /**
@@ -9,17 +10,19 @@ public class SubtractionSolver extends SimpleAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
-    return 2;
+    return super.getExecutionEstimate(content) + 1000;
   }
 
   @Override
   protected void problemReceived(Problem problem) {
     problem.solve();
-    System.out.println(id() + problem + " solved!");
+    Log.v(getTag(), "Returning answer: " + problem);
   }
 
   @Override
   protected String getServiceName() {
+
     return Operator.SUBTRACTION.get();
   }
+
 }

@@ -1,6 +1,7 @@
 package behaviors;
 
 import jade.core.behaviours.Behaviour;
+import misc.Log;
 import misc.Problem;
 
 /**
@@ -29,7 +30,7 @@ public class ProblemSplitterBehavior extends Behaviour {
     switch (state) {
       case READY:
         Problem subProblem = problem.getSubproblem();
-        System.out.println("Requesting solving of subproblem: " + subProblem);
+        Log.v(myAgent.getLocalName(), "Requesting solving of subproblem: " + subProblem);
         problemDelegatorBehavior = new ProblemDelegatorBehavior(subProblem);
         myAgent.addBehaviour(problemDelegatorBehavior);
 
@@ -37,13 +38,14 @@ public class ProblemSplitterBehavior extends Behaviour {
         break;
       case WAITING_FOR_ANSWER:
         if (problemDelegatorBehavior.done()) {
-          System.out.println("Partial problem solved ...");
+          Log.v(myAgent.getLocalName(), "Partial problem solved ...");
           state = State.PARTIALLY_SOLVED;
         }
         break;
       case PARTIALLY_SOLVED:
         if (problem.isSolved()) {
-          System.out.println("Problem " + problemDescription + " successfully solved! The answer was " + problem);
+          Log.v(myAgent.getLocalName(),
+                "Problem " + problemDescription + " successfully solved! The answer was " + problem);
           state = State.SOLVED;
         } else {
           state = State.READY;

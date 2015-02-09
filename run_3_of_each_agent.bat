@@ -1,0 +1,2 @@
+java -cp "*;build/classes/main" jade.Boot -gui admin:agents.TaskAdministrator;multi:agents.MultiplicationSolver;add:agents.AdditionSolver;div:agents.DivisionSolver;sub:agents.SubtractionSolver;multi2:agents.MultiplicationSolver;add2:agents.AdditionSolver;div2:agents.DivisionSolver;sub2:agents.SubtractionSolver;multi3:agents.MultiplicationSolver;add3:agents.AdditionSolver;div3:agents.DivisionSolver;sub3:agents.SubtractionSolver
+pause

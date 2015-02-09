@@ -8,11 +8,13 @@ import java.util.stream.Collectors;
 import agents.TaskAdministrator;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import misc.Log;
 import misc.Problem;
 
 /**
@@ -21,7 +23,8 @@ import misc.Problem;
 public class ProblemDelegatorBehavior extends Behaviour {
 
   private int bestTime = Integer.MAX_VALUE;
-  private long announceTime;
+  private AID bestChoice;
+  private String conversationId;
 
   private enum State {
     ANNOUNCE, RECEIVE_PROPOSAL, WAITING_FOR_SOLUTION, DONE,
@@ -57,44 +60,69 @@ public class ProblemDelegatorBehavior extends Behaviour {
     sellerAgents.forEach(agent -> cfp.addReceiver(agent));
 
     cfp.setContent(problem.toString());
-    cfp.setConversationId("math-problem_" + System.currentTimeMillis());
+    conversationId = "math-problem_" + System.currentTimeMillis() + Math.random();
+    cfp.setConversationId(conversationId);
 
     myAgent.send(cfp);
 
     currentState = State.RECEIVE_PROPOSAL;
-
-    announceTime = System.currentTimeMillis();
   }
 
   private void evaluateProposal() {
-    ACLMessage reply = myAgent.receive();
-    if (reply != null && reply.getPerformative() == ACLMessage.PROPOSE) {
-      int finishTime = Integer.parseInt(reply.getContent());
+    ACLMessage msg = myAgent.receive();
+    if (msg == null) {
+      return;
+    }
 
-      if (finishTime > bestTime) {
+    if (isValidPropose(msg)) {
+      int finishTime = Integer.parseInt(msg.getContent());
+
+      if (finishTime >= bestTime) {
         return;
       }
 
       // this is the best bid
       bestTime = finishTime;
+      bestChoice = msg.getSender();
 
-      AID bestChoice = reply.getSender();
+      myAgent.addBehaviour(new WakerBehaviour(myAgent, 1000) {
+        @Override
+        protected void handleElapsedTimeout() {
+          currentState = State.WAITING_FOR_SOLUTION;
+          Log.v(myAgent.getLocalName(),
+                bestChoice.getLocalName() + " is chosen as the winner! Requesting a solution ...");
+          ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+          accept.addReceiver(bestChoice);
+          accept.setContent(problem.toString());
+          accept.setConversationId(conversationId);
+          myAgent.send(accept);
 
-      ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-      accept.addReceiver(bestChoice);
-      accept.setContent(problem.toString());
-      myAgent.send(accept);
-      System.out.println(bestChoice.getLocalName() + " is chosen as the winner! Requesting a solution ...");
-
-      currentState = State.WAITING_FOR_SOLUTION;
+        }
+      });
+    } else {
+      myAgent.send(msg);
     }
   }
 
+  private boolean isValidPropose(ACLMessage msg) {
+    return msg.getPerformative() == ACLMessage.PROPOSE && msg.getConversationId().equalsIgnoreCase(conversationId);
+  }
+
+  private boolean isValidSolution(ACLMessage msg) {
+    return msg.getPerformative() == ACLMessage.INFORM && msg.getSender().getLocalName()
+        .equalsIgnoreCase(bestChoice.getLocalName()) && msg.getConversationId().equalsIgnoreCase(conversationId);
+  }
+
   private void processSolution() {
-    ACLMessage reply = myAgent.receive();
-    if (reply != null && reply.getPerformative() == ACLMessage.INFORM) {
-      problem.solve(reply.getContent());
+    ACLMessage msg = myAgent.receive();
+    if (msg == null) {
+      return;
+    }
+    if (isValidSolution(msg)) {
       currentState = State.DONE;
+      problem.solve(msg.getContent());
+    } else {
+      myAgent.send(msg);
     }
   }
 

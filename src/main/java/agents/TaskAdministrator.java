@@ -5,6 +5,9 @@ import java.util.Deque;
 
 import behaviors.ProblemSplitterBehavior;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
+import misc.Log;
 import misc.Problem;
 
 /**
@@ -19,23 +22,51 @@ public class TaskAdministrator extends Agent {
   @Override
   protected void setup() {
     // Printout a welcome message
-    System.out.println("Hello! Buyer-agent " + getAID().getName() + " is ready.");
+    Log.v(getTag(), "Hello! Buyer-agent " + getAID().getName() + " is ready.");
 
+    addSampleProblems();
+
+    enableQueryRefProcessing();
+
+  }
+
+
+  private void addSampleProblems() {
     // if no args, create dummy problems
     Object[] args = getArguments();
     if (args == null || args.length == 0) {
-      System.out.println("Adding some dummy problems ...");
-//      problems.add(new Problem("+ - 3 9 * 5 1"));
-//      problems.add(new Problem("+ * 5 2 - 7 2"));
-      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
+      Log.v(getTag(), "Adding some dummy problems ...");
+
+      for (int i = 0; i < 10; i++) {
+        problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
+      }
     }
 
     problems.forEach(p -> {
       p = problems.removeFirst();
-      System.out.println("Announcing problem: " + p);
+      Log.v(getTag(), "New problem: " + p);
       addBehaviour(new ProblemSplitterBehavior(p));
     });
+  }
 
+  private void enableQueryRefProcessing() {
+    addBehaviour(new CyclicBehaviour() {
+      @Override
+      public void action() {
+        ACLMessage query = myAgent.receive();
+        if (query == null) {
+          return;
+        }
+        if (query.getPerformative() == ACLMessage.QUERY_REF) {
+          addBehaviour(new ProblemSplitterBehavior(new Problem(query.getContent())));
+        } else {
+          // didn't want this message, passing it forward!
+          send(query);
+        }
+
+        block();
+      }
+    });
   }
 
 
@@ -45,4 +76,7 @@ public class TaskAdministrator extends Agent {
   }
 
 
+  private String getTag() {
+    return getLocalName();
+  }
 }
