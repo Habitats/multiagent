@@ -62,7 +62,6 @@ public class ProblemDelegatorBehavior extends Behaviour {
     }
   }
 
-
   private void announceProblem() {
     List<AID> sellerAgents = getAgentIds(problem);
 
@@ -103,20 +102,13 @@ public class ProblemDelegatorBehavior extends Behaviour {
           myAgent.send(accept);
         }
       });
-    } else {
-//      myAgent.send(msg);
-      System.out.println("lmao");
     }
   }
 
   private void processSolution(ACLMessage msg) {
-
     if (isValidSolution(msg)) {
       currentState = State.DONE;
       problem.solve(msg.getContent());
-    } else {
-//      myAgent.send(msg);
-      System.out.println("rofl");
     }
   }
 

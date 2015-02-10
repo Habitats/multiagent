@@ -37,7 +37,9 @@ public class TaskAdministrator extends Agent {
     Log.v(getTag(), "Adding some dummy problems ...");
 
     for (int i = 0; i < 1; i++) {
-      problems.add(new Problem("- + - 15 - 7 1 3 + 1 1"));
+//      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
+
+//      problems.add(new Problem("+ + 3 2 + 1 1"));
 //      problems.add(new Problem("+ + + 15 3 + 2 1 1"));
 //      problems.add(new Problem("+ 7 + 1 2 + 1"));
 //      problems.add(new Problem("+ + + 1 1 + 2 + 4 1 1"));
@@ -58,6 +60,7 @@ public class TaskAdministrator extends Agent {
       public void action() {
         ACLMessage query = myAgent.receive();
         if (query == null) {
+          block();
           return;
         }
         if (query.getPerformative() == ACLMessage.QUERY_REF) {
@@ -67,14 +70,10 @@ public class TaskAdministrator extends Agent {
         } else {
           // didn't want this message, passing it forward!
           jobs.stream().forEach(b -> b.newMessage(query));
-          System.out.println("lol");
         }
-
-        block();
       }
     });
   }
-
 
   @Override
   protected void takeDown() {

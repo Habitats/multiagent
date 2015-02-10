@@ -42,9 +42,7 @@ public class ProblemSplitterBehavior extends Behaviour {
   }
 
   public void newMessage(ACLMessage query) {
-    if (problemDelegatorBehavior != null) {
       problemDelegatorBehavior.newMessage(query);
-    }
   }
 
   private void assignSubProblem() {
