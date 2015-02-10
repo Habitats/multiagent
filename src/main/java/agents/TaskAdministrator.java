@@ -1,7 +1,9 @@
 package agents;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 import behaviors.ProblemSplitterBehavior;
 import jade.core.Agent;
@@ -19,6 +21,7 @@ public class TaskAdministrator extends Agent {
   public static final String SERVICE_PREFIX = "math-solver";
 
   private Deque<Problem> problems = new ArrayDeque<>();
+  private List<ProblemSplitterBehavior> jobs = new ArrayList<>();
 
   @Override
   protected void setup() {
@@ -43,7 +46,9 @@ public class TaskAdministrator extends Agent {
     problems.forEach(p -> {
       p = problems.removeFirst();
       Log.v(getTag(), "New problem: " + p);
-      addBehaviour(new ProblemSplitterBehavior(p));
+      ProblemSplitterBehavior b = new ProblemSplitterBehavior(p);
+      addBehaviour(b);
+      jobs.add(b);
     });
   }
 
@@ -56,10 +61,13 @@ public class TaskAdministrator extends Agent {
           return;
         }
         if (query.getPerformative() == ACLMessage.QUERY_REF) {
-          addBehaviour(new ProblemSplitterBehavior(new Problem(query.getContent())));
+          ProblemSplitterBehavior b = new ProblemSplitterBehavior(new Problem(query.getContent()));
+          addBehaviour(b);
+          jobs.add(b);
         } else {
           // didn't want this message, passing it forward!
-          send(query);
+          jobs.stream().forEach(b -> b.newMessage(query));
+          System.out.println("lol");
         }
 
         block();

@@ -29,6 +29,7 @@ public class ProblemDelegatorBehavior extends Behaviour {
   private AID bestChoice;
   private String conversationId;
 
+
   private enum State {
     ANNOUNCE, RECEIVE_PROPOSAL, WAITING_FOR_SOLUTION, DONE,
   }
@@ -46,15 +47,21 @@ public class ProblemDelegatorBehavior extends Behaviour {
       case ANNOUNCE:
         announceProblem();
         break;
-      case RECEIVE_PROPOSAL:
-        evaluateProposal();
-        break;
-      case WAITING_FOR_SOLUTION:
-        processSolution();
-        break;
     }
     block();
   }
+
+  public void newMessage(ACLMessage msg) {
+    switch (currentState) {
+      case RECEIVE_PROPOSAL:
+        evaluateProposal(msg);
+        break;
+      case WAITING_FOR_SOLUTION:
+        processSolution(msg);
+        break;
+    }
+  }
+
 
   private void announceProblem() {
     List<AID> sellerAgents = getAgentIds(problem);
@@ -66,16 +73,11 @@ public class ProblemDelegatorBehavior extends Behaviour {
     conversationId = generateConversationId();
     cfp.setConversationId(conversationId);
 
-    myAgent.send(cfp);
-
     currentState = State.RECEIVE_PROPOSAL;
+    myAgent.send(cfp);
   }
 
-  private void evaluateProposal() {
-    ACLMessage msg = myAgent.receive();
-    if (msg == null) {
-      return;
-    }
+  private void evaluateProposal(ACLMessage msg) {
 
     if (isValidPropose(msg)) {
       int finishTime = Integer.parseInt(msg.getContent());
@@ -99,24 +101,22 @@ public class ProblemDelegatorBehavior extends Behaviour {
           accept.setContent(problem.toString());
           accept.setConversationId(conversationId);
           myAgent.send(accept);
-
         }
       });
     } else {
-      myAgent.send(msg);
+//      myAgent.send(msg);
+      System.out.println("lmao");
     }
   }
 
-  private void processSolution() {
-    ACLMessage msg = myAgent.receive();
-    if (msg == null) {
-      return;
-    }
+  private void processSolution(ACLMessage msg) {
+
     if (isValidSolution(msg)) {
       currentState = State.DONE;
       problem.solve(msg.getContent());
     } else {
-      myAgent.send(msg);
+//      myAgent.send(msg);
+      System.out.println("rofl");
     }
   }
 

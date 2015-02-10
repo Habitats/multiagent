@@ -1,6 +1,7 @@
 package behaviors;
 
 import jade.core.behaviours.Behaviour;
+import jade.lang.acl.ACLMessage;
 import misc.Log;
 import misc.Problem;
 
@@ -10,7 +11,6 @@ import misc.Problem;
  * reports back the final solution.
  */
 public class ProblemSplitterBehavior extends Behaviour {
-
 
   private enum State {
     WAITING_FOR_ANSWER, READY, PARTIALLY_SOLVED, SOLVED
@@ -38,6 +38,12 @@ public class ProblemSplitterBehavior extends Behaviour {
       case PARTIALLY_SOLVED:
         evaluateSolution();
         break;
+    }
+  }
+
+  public void newMessage(ACLMessage query) {
+    if (problemDelegatorBehavior != null) {
+      problemDelegatorBehavior.newMessage(query);
     }
   }
 
