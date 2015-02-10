@@ -19,19 +19,20 @@ public class Problem {
   private String value;
 
   public Problem(String problem) {
+    // formats a "+ + 1 1 + 2 2" expression into a mutable List<String> of characters
     this(Arrays.asList(problem.trim().split(" ")).stream().collect(Collectors.toList()));
   }
 
-  private Problem(List<String> subProblem) {
-    value = subProblem.remove(0);
+  private Problem(List<String> problemList) {
+    value = problemList.remove(0);
 
     if (!isOperator(value)) {
       isTerminal = true;
       return;
     }
 
-    leftChild = new Problem(subProblem);
-    rightChild = new Problem(subProblem);
+    leftChild = new Problem(problemList);
+    rightChild = new Problem(problemList);
   }
 
   private boolean isOperator(String s) {
@@ -42,6 +43,9 @@ public class Problem {
     return value;
   }
 
+  /**
+   * @return - the first explicitly solvable sub problem, found by doing a depth first search in the problem tree
+   */
   public Problem getSubproblem() {
     return leftChild.isTerminal && !rightChild.isTerminal ? rightChild.getSubproblem() :  //
            leftChild.isTerminal && rightChild.isTerminal ? this : leftChild.getSubproblem();
@@ -62,6 +66,12 @@ public class Problem {
     return isOperator(value) ? value : null;
   }
 
+  /**
+   * Solves the problem.
+   *
+   * The actual solving of the trivial arithmetic problem is encapsulated within the problem itself. This was done
+   * mainly to keep the system simple. The solving method is only invoked by the solver agents.
+   */
   public void solve() {
     switch (value.charAt(0)) {
       case '+':
@@ -89,5 +99,4 @@ public class Problem {
   public String toString() {
     return value.toString() + " " + (isTerminal ? "" : leftChild.toString() + rightChild.toString());
   }
-
 }

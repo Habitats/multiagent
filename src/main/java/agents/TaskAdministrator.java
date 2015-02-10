@@ -32,15 +32,17 @@ public class TaskAdministrator extends Agent {
     enableQueryRefProcessing();
   }
 
+  /**
+   * Create some dummy problems for easy testing -- they are executed on start
+   */
   private void addSampleProblems() {
-    // create some dummy problems for easy testing
     Log.v(getTag(), "Adding some dummy problems ...");
 
     for (int i = 0; i < 1; i++) {
 //      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
 
-//      problems.add(new Problem("+ + 3 2 + 1 1"));
-//      problems.add(new Problem("+ + + 15 3 + 2 1 1"));
+      problems.add(new Problem("+ + 3 2 + 1 1"));
+      problems.add(new Problem("+ + + 15 3 + 2 1 1"));
 //      problems.add(new Problem("+ 7 + 1 2 + 1"));
 //      problems.add(new Problem("+ + + 1 1 + 2 + 4 1 1"));
     }
@@ -54,6 +56,9 @@ public class TaskAdministrator extends Agent {
     });
   }
 
+  /**
+   * This allows the TA to receive problems through QUERY_REF messages
+   */
   private void enableQueryRefProcessing() {
     addBehaviour(new CyclicBehaviour() {
       @Override
@@ -79,7 +84,6 @@ public class TaskAdministrator extends Agent {
   protected void takeDown() {
     Log.v(getTag(), "Shutting down!");
   }
-
 
   private String getTag() {
     return getLocalName();

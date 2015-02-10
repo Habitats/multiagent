@@ -21,7 +21,7 @@ import misc.Problem;
  */
 public abstract class AbstractSolverAgent extends Agent {
 
-  private int jobs = 0;
+  private int runningJobs = 0;
   private int finishedJobs = 0;
   protected final int EXECUTION_CONSTANT = 3000;
   private Map<String, Problem> problems = new HashMap<>();
@@ -88,7 +88,7 @@ public abstract class AbstractSolverAgent extends Agent {
   }
 
   protected int getExecutionEstimate(String content) {
-    return jobs * EXECUTION_CONSTANT + finishedJobs * EXECUTION_CONSTANT / 100;
+    return runningJobs * EXECUTION_CONSTANT + finishedJobs * EXECUTION_CONSTANT / 100;
   }
 
   private void registerWithYellowPages() {
@@ -142,7 +142,7 @@ public abstract class AbstractSolverAgent extends Agent {
       super(myAgent, executionEstimate);
       this.conversationId = conversationId;
       this.sender = sender;
-      jobs++;
+      runningJobs++;
       finishedJobs++;
     }
 
@@ -154,7 +154,7 @@ public abstract class AbstractSolverAgent extends Agent {
       reply.addReceiver(sender);
       reply.setConversationId(conversationId);
       myAgent.send(reply);
-      jobs--;
+      runningJobs--;
     }
   }
 }
