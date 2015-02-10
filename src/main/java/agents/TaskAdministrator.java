@@ -33,8 +33,11 @@ public class TaskAdministrator extends Agent {
     // create some dummy problems for easy testing
     Log.v(getTag(), "Adding some dummy problems ...");
 
-    for (int i = 0; i < 3; i++) {
-      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
+    for (int i = 0; i < 1; i++) {
+      problems.add(new Problem("- + - 15 - 7 1 3 + 1 1"));
+//      problems.add(new Problem("+ + + 15 3 + 2 1 1"));
+//      problems.add(new Problem("+ 7 + 1 2 + 1"));
+//      problems.add(new Problem("+ + + 1 1 + 2 + 4 1 1"));
     }
 
     problems.forEach(p -> {

@@ -10,7 +10,7 @@ public class MultiplicationSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
-    return super.getExecutionEstimate(content) + 1000;
+    return super.getExecutionEstimate(content) + EXECUTION_CONSTANT;
   }
 
   @Override

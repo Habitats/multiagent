@@ -43,6 +43,7 @@ public class ProblemSplitterBehavior extends Behaviour {
 
   private void assignSubProblem() {
     Problem subProblem = problem.getSubproblem();
+    Log.v(myAgent.getLocalName(), "Current state of full problem: " + problem);
     Log.v(myAgent.getLocalName(), "Requesting solving of subproblem: " + subProblem);
     problemDelegatorBehavior = new ProblemDelegatorBehavior(subProblem);
     myAgent.addBehaviour(problemDelegatorBehavior);
