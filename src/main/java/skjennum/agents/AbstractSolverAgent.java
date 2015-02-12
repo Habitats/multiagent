@@ -1,4 +1,4 @@
-package agents;
+package skjennum.agents;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +13,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import misc.Log;
-import misc.Problem;
+import skjennum.misc.Log;
+import skjennum.misc.Problem;
 
 /**
  * This is an abstract solver agent which inherits most of the functionality for the simple solver agents.

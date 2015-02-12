@@ -1,16 +1,16 @@
-package agents;
+package skjennum.agents;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import behaviors.ProblemSplitterBehavior;
+import skjennum.behaviors.ProblemSplitterBehavior;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import misc.Log;
-import misc.Problem;
+import skjennum.misc.Log;
+import skjennum.misc.Problem;
 
 /**
  * The TaskAdministrator class is the brain of the problem solving process. It decomposes problems into subproblems,
@@ -28,7 +28,7 @@ public class TaskAdministrator extends Agent {
     // Printout a welcome message
     Log.v(getTag(), "Hello! Buyer-agent " + getAID().getName() + " is ready.");
 
-    addSampleProblems();
+//    addSampleProblems();
     enableQueryRefProcessing();
   }
 
@@ -39,12 +39,12 @@ public class TaskAdministrator extends Agent {
     Log.v(getTag(), "Adding some dummy problems ...");
 
     for (int i = 0; i < 1; i++) {
-//      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
+      problems.add(new Problem("- * / 15 - 7 + 1 1 3 + 2 + 1 1"));
 
       problems.add(new Problem("+ + 3 2 + 1 1"));
       problems.add(new Problem("+ + + 15 3 + 2 1 1"));
-//      problems.add(new Problem("+ 7 + 1 2 + 1"));
-//      problems.add(new Problem("+ + + 1 1 + 2 + 4 1 1"));
+      problems.add(new Problem("+ 7 + 1 2 + 1"));
+      problems.add(new Problem("+ + + 1 1 + 2 + 4 1 1"));
     }
 
     problems.forEach(p -> {

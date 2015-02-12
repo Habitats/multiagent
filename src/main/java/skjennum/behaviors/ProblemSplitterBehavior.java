@@ -1,9 +1,9 @@
-package behaviors;
+package skjennum.behaviors;
 
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
-import misc.Log;
-import misc.Problem;
+import skjennum.misc.Log;
+import skjennum.misc.Problem;
 
 /**
  * This behavior decomposes a more complex problem into smaller parts. After having split up the problem, it sends each

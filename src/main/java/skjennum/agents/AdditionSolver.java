@@ -1,12 +1,12 @@
-package agents;
+package skjennum.agents;
 
-import misc.Log;
-import misc.Problem;
+import skjennum.misc.Log;
+import skjennum.misc.Problem;
 
 /**
- * A simple agent for executing multiplication
+ * A simple agent for executing addition
  */
-public class MultiplicationSolver extends AbstractSolverAgent {
+public class AdditionSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
@@ -16,12 +16,12 @@ public class MultiplicationSolver extends AbstractSolverAgent {
   @Override
   protected void problemReceived(Problem problem) {
     problem.solve();
-    Log.v(getTag(), problem + " solved!");
+    Log.v(getTag(), "Returning answer: " + problem);
   }
 
   @Override
   protected String getServiceName() {
-    return Operator.MULTIPLICATION.get();
+    return Operator.ADDITION.get();
   }
 
 

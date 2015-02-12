@@ -1,4 +1,4 @@
-package misc;
+package skjennum.misc;
 
 import java.util.Arrays;
 import java.util.List;
