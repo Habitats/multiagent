@@ -1,16 +1,16 @@
-package skjennum.agents;
+package a.agents;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import skjennum.behaviors.ProblemSplitterBehavior;
+import util.Log;
+import a.misc.Problem;
+import a.behaviors.ProblemSplitterBehavior;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import skjennum.misc.Log;
-import skjennum.misc.Problem;
 
 /**
  * The TaskAdministrator class is the brain of the problem solving process. It decomposes problems into subproblems,

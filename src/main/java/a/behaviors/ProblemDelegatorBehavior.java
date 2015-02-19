@@ -1,11 +1,13 @@
-package skjennum.behaviors;
+package a.behaviors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import skjennum.agents.TaskAdministrator;
+import a.agents.TaskAdministrator;
+import util.Log;
+import a.misc.Problem;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.WakerBehaviour;
@@ -14,8 +16,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import skjennum.misc.Log;
-import skjennum.misc.Problem;
 
 /**
  * This behavior delegates and sends the trivial sub problems to agents for solving. It also handles auctions and

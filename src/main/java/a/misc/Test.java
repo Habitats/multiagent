@@ -1,4 +1,4 @@
-package skjennum.misc;
+package a.misc;
 
 /**
  * Simple test to check that the prefix calculator tree thingy actually works

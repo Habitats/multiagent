@@ -1,4 +1,4 @@
-package skjennum.misc;
+package util;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

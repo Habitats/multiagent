@@ -1,12 +1,12 @@
-package skjennum.agents;
+package a.agents;
 
-import skjennum.misc.Log;
-import skjennum.misc.Problem;
+import util.Log;
+import a.misc.Problem;
 
 /**
- * A simple agent for executing division
+ * A simple agent for executing addition
  */
-public class DivisionSolver extends AbstractSolverAgent {
+public class AdditionSolver extends AbstractSolverAgent {
 
   @Override
   protected int getExecutionEstimate(String content) {
@@ -21,7 +21,8 @@ public class DivisionSolver extends AbstractSolverAgent {
 
   @Override
   protected String getServiceName() {
-    return Operator.DIVISION.get();
+    return Operator.ADDITION.get();
   }
+
 
 }
