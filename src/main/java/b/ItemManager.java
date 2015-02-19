@@ -5,18 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import b.misc.Item;
-import jade.core.Agent;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
-import util.Log;
 
 /**
  * Created by Patrick on 19.02.2015.
  */
-public class ItemManager extends Agent {
+public class ItemManager {
 
   private final int NUMBER_OF_AGENTS = 5;
   private final List<Item> inventory = new ArrayList<>();
@@ -24,14 +17,19 @@ public class ItemManager extends Agent {
   private final List<List<Item>> wantedSubLists = new ArrayList<>();
 
   private int id = 0;
-  private String SERVICE_PREFIX = "ITEM_MANAGER";
-  private String SERVICE_NAME = "Harold";
 
-
-  @Override
-  protected void setup() {
+  private ItemManager() {
     generateItems();
   }
+
+  public static ItemManager getInstance() {
+    if (instance == null) {
+      instance = new ItemManager();
+    }
+    return instance;
+  }
+
+  private static ItemManager instance;
 
   public void generateItems() {
 
@@ -62,44 +60,4 @@ public class ItemManager extends Agent {
   public int getUniqueId() {
     return id++;
   }
-
-  private void registerWithYellowPages() {
-    addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(SERVICE_PREFIX + SERVICE_NAME);
-        sd.setName(SERVICE_NAME);
-        dfd.addServices(sd);
-
-        Log.v(getTag(), "Registered with YellowPages!");
-
-        try {
-          DFService.register(ItemManager.this, dfd);
-        } catch (FIPAException fe) {
-          fe.printStackTrace();
-        }
-      }
-    });
-  }
-
-  private String getTag() {
-    return getLocalName();
-  }
-
-
-  @Override
-  protected void takeDown() {
-    // Deregister from the yellow pages
-    try {
-      DFService.deregister(this);
-    } catch (FIPAException fe) {
-      fe.printStackTrace();
-    }
-
-    Log.v(getTag(), "Going down!");
-  }
-
 }
