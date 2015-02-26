@@ -19,7 +19,7 @@ public class Log {
    * Verbose logging. Visible in the standard output only
    */
   public static void v(String tag, Object msg, Exception e) {
-    log(String.format("%s > %s > %s", getPrettyDate(), tag, msg));
+    log(String.format("%s > %s > %s", getPrettyDate(), tag.toUpperCase(), msg));
     e.printStackTrace();
   }
 
@@ -27,7 +27,7 @@ public class Log {
    * Verbose logging. Visible in the standard output only
    */
   public static void v(String tag, Object msg) {
-    log(String.format("%s > %s > %s", getPrettyDate(), tag, msg.toString()));
+    log(String.format("%s > %s > %s", getPrettyDate(), tag.toUpperCase(), msg.toString()));
   }
 
   private static void log(String msg) {

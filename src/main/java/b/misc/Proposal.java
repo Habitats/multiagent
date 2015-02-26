@@ -15,7 +15,7 @@ public class Proposal {
   private final Item proposedItem;
   private final int delta;
   private final Item itemToBuy;
-  private final AID proposingAgent;
+  private final String proposingAgent;
   private final List<Item> declinedItems;
 
   public Proposal(Item proposedItem, int delta, Item itemToBuy, AID proposingAgent) {
@@ -26,7 +26,7 @@ public class Proposal {
     this.proposedItem = proposedItem;
     this.delta = delta;
     this.itemToBuy = itemToBuy;
-    this.proposingAgent = proposingAgent;
+    this.proposingAgent = proposingAgent.getName();
     this.declinedItems = declinedItems;
   }
 
@@ -55,15 +55,19 @@ public class Proposal {
   }
 
   public AID getProposingAgent() {
-    return proposingAgent;
+    return new AID(proposingAgent);
   }
 
   public List<Item> declinedItems() {
     return declinedItems;
   }
 
-
   public void declineItem(Item proposedItem) {
     declinedItems.add(proposedItem);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(" > PROPOSAL > Buy %s for %s and $%d", itemToBuy.getName().toUpperCase(), proposedItem.getName().toUpperCase(), delta);
   }
 }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import b.MessageListener;
 import b.behaviors.NegotiatingBehavior;
+import b.misc.Inventory;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -24,13 +25,12 @@ import util.Log;
  */
 public class NegotiatingAgent extends Agent {
 
-
+  private static final String ITEM_MANAGER_SERVICE = "ITEM_MANAGER";
   private List<MessageListener> listeners;
 
   public void addMessageListener(MessageListener negotiatingBehavior) {
     listeners.add(negotiatingBehavior);
   }
-
 
   private static final String SERVICE_PREFIX = "NEGOTIATION";
   private static final String SERVICE_NAME = "yoloswag";
@@ -41,6 +41,19 @@ public class NegotiatingAgent extends Agent {
 
     registerWithYellowPages();
     addBehaviour(createMessageManagerBehavior());
+    addBehaviour(createInventoryAquisitionBehavior());
+  }
+
+  private WakerBehaviour createInventoryAquisitionBehavior() {
+    return new WakerBehaviour(this, 1000) {
+      @Override
+      protected void onWake() {
+        ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+        req.addReceiver(getItemManager());
+        send(req);
+
+      }
+    };
   }
 
   private CyclicBehaviour createMessageManagerBehavior() {
@@ -52,15 +65,33 @@ public class NegotiatingAgent extends Agent {
           block();
           return;
         }
-        listeners.forEach(l -> l.newMessage(msg));
+        if (msg.getPerformative() == ACLMessage.INFORM) {
+          addBehaviour(new WakerBehaviour(NegotiatingAgent.this, 1000) {
+            @Override
+            protected void onWake() {
+              addBehaviour(new NegotiatingBehavior(NegotiatingAgent.this, Inventory.fromJson(msg.getContent())));
+            }
+          });
+        } else {
+          listeners.forEach(l -> l.newMessage(msg));
+        }
         block();
       }
     };
   }
 
-
-  private String generateConversationId() {
-    return NegotiatingAgent.SERVICE_PREFIX + System.currentTimeMillis() + Math.random();
+  private AID getItemManager() {
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType(ITEM_MANAGER_SERVICE);
+    DFAgentDescription template = new DFAgentDescription();
+    template.addServices(sd);
+    List<DFAgentDescription> result;
+    try {
+      result = Arrays.asList(DFService.search(this, template));
+    } catch (FIPAException e) {
+      result = new ArrayList<>();
+    }
+    return result.get(0).getName();
   }
 
   public List<AID> getAgentIds() {
@@ -74,7 +105,8 @@ public class NegotiatingAgent extends Agent {
     } catch (FIPAException e) {
       result = new ArrayList<>();
     }
-    return result.stream().map(DFAgentDescription::getName).collect(Collectors.toList());
+    return result.stream().map(DFAgentDescription::getName).filter(name -> !name.getLocalName().equals(getLocalName()))
+        .collect(Collectors.toList());
   }
 
   public String getTag() {
@@ -100,16 +132,9 @@ public class NegotiatingAgent extends Agent {
           fe.printStackTrace();
         }
 
-        addBehaviour(new WakerBehaviour(NegotiatingAgent.this, 1000) {
-          @Override
-          protected void onWake() {
-            addBehaviour(new NegotiatingBehavior(NegotiatingAgent.this));
-          }
-        });
       }
     });
   }
-
 
   @Override
   protected void takeDown() {
@@ -122,5 +147,4 @@ public class NegotiatingAgent extends Agent {
 
     Log.v(getTag(), "Going down!");
   }
-
 }

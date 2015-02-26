@@ -3,7 +3,7 @@ package b.misc;
 
 import com.google.gson.Gson;
 
-import b.ItemManager;
+import b.agents.ItemManager;
 
 /**
  * Created by Patrick on 19.02.2015.

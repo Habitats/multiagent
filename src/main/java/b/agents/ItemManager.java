@@ -1,4 +1,4 @@
-package b;
+package b.agents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,15 +6,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import b.misc.Inventory;
 import b.misc.Item;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import util.Log;
 
 /**
  * Created by Patrick on 19.02.2015.
  */
-public class ItemManager {
+public class ItemManager extends Agent {
 
-  private final int NUMBER_OF_AGENTS = 3;
-  private final int inventorySize = NUMBER_OF_AGENTS * 10;
+  public static final String SERVICE_NAME = "ITEM_MANAGER";
+  private final int NUMBER_OF_AGENTS = 2;
+  private final int inventorySize = NUMBER_OF_AGENTS * 5;
   private final List<Item> inventory = new ArrayList<>();
   private final List<List<Item>> inventorySubLists = new ArrayList<>();
   private final List<List<Item>> wantedSubLists = new ArrayList<>();
@@ -38,18 +49,31 @@ public class ItemManager {
   private static int id = 0;
   private List<String> nounsList;
 
-  private ItemManager() {
+
+  @Override
+  protected void setup() {
+    registerWithYellowPages();
     generateItems();
+    addBehaviour(new CyclicBehaviour() {
+      @Override
+      public void action() {
+        ACLMessage msg = myAgent.receive();
+        if (msg == null) {
+          block();
+          return;
+        }
+        if (msg.getPerformative() == ACLMessage.REQUEST) {
+          ACLMessage res = new ACLMessage(ACLMessage.INFORM);
+          Inventory inv = Inventory.create(aquireItems(), wantedItems());
+          res.setContent(Inventory.toJson(inv));
+          res.addReceiver(msg.getSender());
+          send(res);
+        }
+        block();
+      }
+    });
   }
 
-  public static ItemManager getInstance() {
-    if (instance == null) {
-      instance = new ItemManager();
-    }
-    return instance;
-  }
-
-  private static ItemManager instance;
 
   public void generateItems() {
     nounsList = Arrays.asList(nouns.split("\\s")).stream().collect(Collectors.toList());
@@ -83,5 +107,43 @@ public class ItemManager {
 
   public static int generateUniqueId() {
     return id++;
+  }
+
+  private void registerWithYellowPages() {
+    addBehaviour(new OneShotBehaviour() {
+      @Override
+      public void action() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(SERVICE_NAME);
+        sd.setName(SERVICE_NAME);
+        dfd.addServices(sd);
+
+        Log.v(getTag(), "Registered with YellowPages!");
+
+        try {
+          DFService.register(ItemManager.this, dfd);
+        } catch (FIPAException fe) {
+          fe.printStackTrace();
+        }
+      }
+    });
+  }
+
+  private String getTag() {
+    return getLocalName();
+  }
+
+  @Override
+  protected void takeDown() {
+    // Deregister from the yellow pages
+    try {
+      DFService.deregister(this);
+    } catch (FIPAException fe) {
+      fe.printStackTrace();
+    }
+
+    Log.v(getTag(), "Going down!");
   }
 }

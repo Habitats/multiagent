@@ -40,7 +40,7 @@ public class test_Inventory {
     inv.has().add(itemToSell);
     inv.want().add(itemToBuy);
 
-    Item closestMatchingVendible = inv.getClosestMatchingVendible(itemToBuy.getvalue());
+    Item closestMatchingVendible = inv.getClosestMatchingVendible(itemToBuy.getvalue()).get();
     assertEquals(itemToSell, closestMatchingVendible);
     Proposal proposal = new Proposal(closestMatchingVendible, 5, itemToBuy, null);
     assertEquals(proposal.getDelta(), 5);
@@ -76,7 +76,7 @@ public class test_Inventory {
     assertEquals(inv2.getMoney(), 50);
     assertEquals(inv1.getMoney(), 50);
 
-    Proposal p1 = inv1.generateOffer(item3, null);
+    Proposal p1 = inv1.generateOffer(item3, null).get();
     assertEquals(inv1.getMoney(), 40);
     assertEquals(p1.getProposedItem(), item1);
 

@@ -1,12 +1,13 @@
 package b.misc;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import b.ItemManager;
 import jade.core.AID;
 
 /**
@@ -33,10 +34,10 @@ public class Inventory {
     return inv;
   }
 
-  public static Inventory create() {
+  public static Inventory create(List<Item> inventory, List<Item> want) {
     Inventory inv = new Inventory();
-    inv.inventory = ItemManager.getInstance().aquireItems();
-    inv.want = ItemManager.getInstance().wantedItems();
+    inv.inventory = inventory;
+    inv.want = want;
     inv.want.removeIf(inv.inventory::contains);
     return inv;
   }
@@ -52,14 +53,17 @@ public class Inventory {
     return offeredItem;
   }
 
-  public Proposal generateOffer(Item itemToBuy, AID proposingAgent) {
-    Item item = getClosestMatchingVendible(itemToBuy.getvalue());
-    int delta = itemToBuy.getvalue() - item.getvalue();
-    Proposal proposal = new Proposal(item, delta, itemToBuy, proposingAgent);
-    inventory.remove(item);
-    money -= delta;
-    moneyOnHold += delta;
-    return proposal;
+  public Optional<Proposal> generateOffer(Item itemToBuy, AID proposingAgent) {
+    Optional<Item> item = getClosestMatchingVendible(itemToBuy.getvalue());
+    if (item.isPresent()) {
+      int delta = itemToBuy.getvalue() - item.get().getvalue();
+      Proposal proposal = new Proposal(item.get(), delta, itemToBuy, proposingAgent);
+      inventory.remove(item);
+      money -= delta;
+      moneyOnHold += delta;
+      return Optional.of(proposal);
+    }
+    return Optional.empty();
   }
 
 
@@ -67,8 +71,8 @@ public class Inventory {
     return inventory.stream().filter(i -> !want.contains(i)).collect(Collectors.toList());
   }
 
-  public Item getClosestMatchingVendible(int maxPrice) {
-    return vendible().stream().filter(i -> i.getvalue() <= maxPrice).max(Comparator.<Item>naturalOrder()).get();
+  public Optional<Item> getClosestMatchingVendible(int maxPrice) {
+    return vendible().stream().filter(i -> i.getvalue() <= maxPrice).max(Comparator.<Item>naturalOrder());
   }
 
   private boolean evaluateOffer(Proposal proposal) {
@@ -109,7 +113,10 @@ public class Inventory {
         .max(Comparator.<Item>naturalOrder());
     if (newItem.isPresent()) {
       int delta = oldProposal.getIemToBuy().getvalue() - newItem.get().getvalue();
-      Proposal newProposal = new Proposal(newItem.get(), delta, oldProposal.getIemToBuy(), oldProposal.getProposingAgent(), oldProposal.declinedItems());
+      Proposal
+          newProposal =
+          new Proposal(newItem.get(), delta, oldProposal.getIemToBuy(), oldProposal.getProposingAgent(),
+                       oldProposal.declinedItems());
       inventory.remove(newItem.get());
       money -= delta;
       moneyOnHold += delta;
@@ -142,12 +149,24 @@ public class Inventory {
     return money;
   }
 
+  public static Inventory fromJson(String json) {
+    return new Gson().fromJson(json, Inventory.class);
+  }
+
+  public static String toJson(Inventory item) {
+    return new Gson().toJson(item, Inventory.class);
+  }
+
   @Override
   public String toString() {
-    return String.format("I: %s - W: %s", getConcat(inventory), getConcat(want));
+    return String.format("> INVENTORY > %s > WANT > %s", getConcat(inventory), getConcat(want));
   }
 
   private String getConcat(List<Item> inventory) {
     return inventory.stream().map(Item::getName).collect(Collectors.joining(", "));
+  }
+
+  public List<Proposal> getProposals() {
+    return proposals;
   }
 }
