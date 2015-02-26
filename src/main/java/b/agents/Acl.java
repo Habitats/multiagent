@@ -9,14 +9,14 @@ import jade.lang.acl.ACLMessage;
  * Created by anon on 24.02.2015.
  */
 public enum Acl {
-  PROPOSE(ACLMessage.PROPOSE), //
-  REFUSE(ACLMessage.REFUSE), //
+  PROPOSE_OFFER(ACLMessage.PROPOSE), //
+  OFFER_DECLINED(ACLMessage.REFUSE), //
   REQUEST(ACLMessage.REQUEST), //
   INFORM(ACLMessage.INFORM), //
   CONFIRM(ACLMessage.CONFIRM),//
-  ACCEPT_PROPOSAL(ACLMessage.ACCEPT_PROPOSAL),//
+  ACCPET_PROPOSAL(ACLMessage.ACCEPT_PROPOSAL),//
   QUERY_REF(ACLMessage.QUERY_REF), //
-  CFP(ACLMessage.CFP);
+  ANNOUNCEMENT(ACLMessage.CFP);
 
   private final int inform;
 
