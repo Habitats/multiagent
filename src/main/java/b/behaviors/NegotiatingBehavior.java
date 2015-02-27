@@ -13,7 +13,6 @@ import b.misc.Item;
 import b.misc.Proposal;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -59,6 +58,8 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
         }
       }
     });
+
+    block();
   }
 
   public void newMessage(ACLMessage msg) {
@@ -84,50 +85,41 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
   }
 
   private void announceInventoryItems() {
-    agent.addBehaviour(new OneShotBehaviour() {
+
+    Log.v(getTag(), String.format("Announcing my inventory %s", inv));
+    currentState = State.NEGOTIATING;
+    List<AID> sellerAgents = agent.getAgentIds();
+    ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+    sellerAgents.forEach(cfp::addReceiver);
+    cfp.setContent(inv.has().stream().map(Item::toJson).collect(Collectors.joining(DELIMITER)));
+    agent.send(cfp);
+    agent.addBehaviour(new WakerBehaviour(agent, 1000) {
       @Override
-      public void action() {
-        Log.v(getTag(), String.format("Announcing my inventory %s", inv));
-        currentState = State.NEGOTIATING;
-        List<AID> sellerAgents = agent.getAgentIds();
-        ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-        sellerAgents.forEach(cfp::addReceiver);
-        cfp.setContent(inv.has().stream().map(Item::toJson).collect(Collectors.joining(DELIMITER)));
-        agent.send(cfp);
-        agent.addBehaviour(new WakerBehaviour(agent, 1000) {
-          @Override
-          protected void onWake() {
-            evaluateProposals();
-          }
-        });
+      protected void onWake() {
+        evaluateProposals();
       }
     });
+
   }
 
   private void processInventoryAnnouncement(ACLMessage msg) {
-    agent.addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        Log.v(getTag(),
-              String.format("CFP > Received inventory announcement from %s!", msg.getSender().getLocalName()));
-        List<Item> announcedItems = Arrays.asList(msg.getContent().split(DELIMITER)).stream()//
-            .map(Item::fromJson).collect(Collectors.toList());
-        Optional<Item> wantedItem = inv.want().stream().filter(announcedItems::contains).findFirst();
-        if (wantedItem.isPresent()) {
+    Log.v(getTag(), String.format("CFP > Received inventory announcement from %s!", msg.getSender().getLocalName()));
+    List<Item> announcedItems = Arrays.asList(msg.getContent().split(DELIMITER)).stream()//
+        .map(Item::fromJson).collect(Collectors.toList());
+    Optional<Item> wantedItem = inv.want().stream().filter(announcedItems::contains).findFirst();
+    if (wantedItem.isPresent()) {
 
-          Optional<Proposal> proposal = inv.generateOffer(wantedItem.get(), getAgent().getAID());
-          if (proposal.isPresent()) {
-            ACLMessage proposalMsg = new ACLMessage(ACLMessage.PROPOSE);
-            proposalMsg.addReceiver(msg.getSender());
-            proposalMsg.setContent(Proposal.toJson(proposal.get()));
-            agent.send(proposalMsg);
-            return;
-          }
-        }
-
-        currentState = State.SEARCHING;
+      Optional<Proposal> proposal = inv.generateOffer(wantedItem.get(), getAgent().getAID());
+      if (proposal.isPresent()) {
+        ACLMessage proposalMsg = new ACLMessage(ACLMessage.PROPOSE);
+        proposalMsg.addReceiver(msg.getSender());
+        proposalMsg.setContent(Proposal.toJson(proposal.get()));
+        agent.send(proposalMsg);
+        return;
       }
-    });
+    }
+
+    currentState = State.SEARCHING;
   }
 
   private void announceWantedItems(ACLMessage msg) {
@@ -137,29 +129,24 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
   }
 
   private void evaluateProposals() {
-    agent.addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        Optional<Proposal> bestProposal = inv.getBestProposal();
-        if (bestProposal.isPresent()) {
-          Log.v(getTag(), String.format("Evaluating proposals ... Accepted %s", bestProposal.get()));
-          ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-          msg.addReceiver(bestProposal.get().getProposingAgent());
-          msg.setContent(Proposal.toJson(bestProposal.get()));
-          agent.send(msg);
+    Optional<Proposal> bestProposal = inv.getBestProposal();
+    if (bestProposal.isPresent()) {
+      Log.v(getTag(), String.format("Evaluating proposals ... Accepted %s", bestProposal.get()));
+      ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+      msg.addReceiver(bestProposal.get().getProposingAgent());
+      msg.setContent(Proposal.toJson(bestProposal.get()));
+      agent.send(msg);
 
-          ACLMessage rejection = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-          Predicate<AID> isLoser = v -> !v.getName().equals(bestProposal.get().getProposingAgent().getName());
-          inv.getProposals().stream().map(Proposal::getProposingAgent).filter(isLoser).forEach(rejection::addReceiver);
-          agent.send(rejection);
-        } else {
-          Log.v(getTag(), String.format("Evaluating proposals ... No satisfying proposals. Rejecting ..."));
-          ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-          inv.getProposals().stream().map(Proposal::getProposingAgent).forEach(msg::addReceiver);
-          agent.send(msg);
-        }
-      }
-    });
+      ACLMessage rejection = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+      Predicate<AID> isLoser = v -> !v.getName().equals(bestProposal.get().getProposingAgent().getName());
+      inv.getProposals().stream().map(Proposal::getProposingAgent).filter(isLoser).forEach(rejection::addReceiver);
+      agent.send(rejection);
+    } else {
+      Log.v(getTag(), String.format("Evaluating proposals ... No satisfying proposals. Rejecting ..."));
+      ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+      inv.getProposals().stream().map(Proposal::getProposingAgent).forEach(msg::addReceiver);
+      agent.send(msg);
+    }
   }
 
   private void receivedProposal(ACLMessage msg) {
@@ -169,37 +156,27 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
   }
 
   private void acceptedProposal(ACLMessage msg) {
-    agent.addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        Proposal proposal = Proposal.fromJson(msg.getContent());
-        inv.accepted(proposal);
-        Log.v(getTag(), String.format("ACCEPT_PROPOSAL > My proposal was accepted! %s %s ", proposal, inv));
-        currentState = State.SEARCHING;
-      }
-    });
+    Proposal proposal = Proposal.fromJson(msg.getContent());
+    inv.accepted(proposal);
+    Log.v(getTag(), String.format("ACCEPT_PROPOSAL > My proposal was accepted! %s %s ", proposal, inv));
+    currentState = State.SEARCHING;
   }
 
   private void declinedProposal(ACLMessage msg) {
-    agent.addBehaviour(new OneShotBehaviour() {
-      @Override
-      public void action() {
-        Proposal proposal = Proposal.fromJson(msg.getContent());
-        Log.v(getTag(), String.format("REJECT_PROPOSAL > My proposal was declined %s", proposal));
-        Optional<Proposal> newProposal = inv.generateBetterProposal(proposal);
-        if (newProposal.isPresent()) {
-          ACLMessage newProposalMsg = new ACLMessage(ACLMessage.PROPOSE);
-          newProposalMsg.addReceiver(msg.getSender());
-          newProposalMsg.setContent(Proposal.toJson(proposal));
-        } else {
-          ACLMessage giveUp = new ACLMessage(ACLMessage.CANCEL);
-          giveUp.addReceiver(msg.getSender());
-          inv.declined(proposal);
-          agent.send(giveUp);
-          currentState = State.SEARCHING;
-        }
-      }
-    });
+    Proposal proposal = Proposal.fromJson(msg.getContent());
+    Log.v(getTag(), String.format("REJECT_PROPOSAL > My proposal was declined %s", proposal));
+    Optional<Proposal> newProposal = inv.generateBetterProposal(proposal);
+    if (newProposal.isPresent()) {
+      ACLMessage newProposalMsg = new ACLMessage(ACLMessage.PROPOSE);
+      newProposalMsg.addReceiver(msg.getSender());
+      newProposalMsg.setContent(Proposal.toJson(proposal));
+    } else {
+      ACLMessage giveUp = new ACLMessage(ACLMessage.CANCEL);
+      giveUp.addReceiver(msg.getSender());
+      inv.declined(proposal);
+      agent.send(giveUp);
+      currentState = State.SEARCHING;
+    }
   }
 
   @Override

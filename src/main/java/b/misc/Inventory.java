@@ -22,7 +22,6 @@ public class Inventory {
   private int moneyOnHold = 0;
 
   private Inventory() {
-
   }
 
   // used for testing
@@ -41,7 +40,6 @@ public class Inventory {
     inv.want.removeIf(inv.inventory::contains);
     return inv;
   }
-
 
   public Item sendOffer(Proposal proposal) {
     money -= proposal.getDelta();
@@ -65,7 +63,6 @@ public class Inventory {
     }
     return Optional.empty();
   }
-
 
   public List<Item> vendible() {
     return inventory.stream().filter(i -> !want.contains(i)).collect(Collectors.toList());
@@ -127,7 +124,7 @@ public class Inventory {
 
   public void accepted(Proposal proposal) {
     moneyOnHold -= proposal.getDelta();
-    inventory.add(proposal.getIemToBuy());
+    add(proposal.getIemToBuy());
   }
 
   public void declined(Proposal proposal) {
