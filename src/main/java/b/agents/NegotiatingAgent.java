@@ -75,7 +75,6 @@ public class NegotiatingAgent extends Agent {
         } else {
           listeners.forEach(l -> l.newMessage(msg));
         }
-        block();
       }
     };
   }
@@ -131,7 +130,6 @@ public class NegotiatingAgent extends Agent {
         } catch (FIPAException fe) {
           fe.printStackTrace();
         }
-
       }
     });
   }
