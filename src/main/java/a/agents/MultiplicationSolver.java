@@ -1,7 +1,7 @@
 package a.agents;
 
-import util.Log;
 import a.misc.Problem;
+import util.Log;
 
 /**
  * A simple agent for executing multiplication

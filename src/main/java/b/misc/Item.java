@@ -8,7 +8,7 @@ import b.agents.ItemManager;
 /**
  * Created by Patrick on 19.02.2015.
  */
-public class Item implements Comparable<Item>{
+public class Item implements Comparable<Item> {
 
   private final String name;
   private final int value;
@@ -28,6 +28,7 @@ public class Item implements Comparable<Item>{
   public static Item create(String name) {
     return new Item(name, (int) (Math.random() * 100));
   }
+
   public static Item create(String name, int value) {
     return new Item(name, value);
   }
@@ -43,7 +44,8 @@ public class Item implements Comparable<Item>{
   public int getId() {
     return id;
   }
-  public Item get(){
+
+  public Item get() {
     return this;
   }
 

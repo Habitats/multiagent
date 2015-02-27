@@ -1,9 +1,9 @@
 package a.behaviors;
 
+import a.misc.Problem;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import util.Log;
-import a.misc.Problem;
 
 /**
  * This behavior decomposes a more complex problem into smaller parts. After having split up the problem, it sends each
@@ -42,7 +42,7 @@ public class ProblemSplitterBehavior extends Behaviour {
   }
 
   public void newMessage(ACLMessage query) {
-      problemDelegatorBehavior.newMessage(query);
+    problemDelegatorBehavior.newMessage(query);
   }
 
   private void assignSubProblem() {

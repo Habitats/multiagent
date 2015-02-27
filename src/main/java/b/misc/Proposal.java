@@ -68,6 +68,7 @@ public class Proposal {
 
   @Override
   public String toString() {
-    return String.format(" > PROPOSAL > Buy %s for %s and $%d", itemToBuy.getName().toUpperCase(), proposedItem.getName().toUpperCase(), delta);
+    return String.format(" > PROPOSAL > Buy %s for %s and $%d", itemToBuy.getName().toUpperCase(),
+                         proposedItem.getName().toUpperCase(), delta);
   }
 }

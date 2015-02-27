@@ -3,6 +3,7 @@ package a.agents;
 import java.util.HashMap;
 import java.util.Map;
 
+import a.misc.Problem;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -14,7 +15,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import util.Log;
-import a.misc.Problem;
 
 /**
  * This is an abstract solver agent which inherits most of the functionality for the simple solver agents.

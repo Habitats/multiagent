@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import util.Log;
-import a.misc.Problem;
 import a.behaviors.ProblemSplitterBehavior;
+import a.misc.Problem;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import util.Log;
 
 /**
  * The TaskAdministrator class is the brain of the problem solving process. It decomposes problems into subproblems,

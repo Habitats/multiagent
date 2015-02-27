@@ -98,7 +98,6 @@ public class Inventory {
     return want;
   }
 
-
   public int getValue(Proposal p) {
     return want.contains(p.getProposedItem()) ? p.getProposedItem().getvalue() + p.getDelta() : 0;
   }
@@ -110,10 +109,8 @@ public class Inventory {
         .max(Comparator.<Item>naturalOrder());
     if (newItem.isPresent()) {
       int delta = oldProposal.getIemToBuy().getvalue() - newItem.get().getvalue();
-      Proposal
-          newProposal =
-          new Proposal(newItem.get(), delta, oldProposal.getIemToBuy(), oldProposal.getProposingAgent(),
-                       oldProposal.declinedItems());
+      Proposal newProposal = new Proposal(newItem.get(), delta, oldProposal.getIemToBuy(), //
+                                          oldProposal.getProposingAgent(), oldProposal.declinedItems());
       inventory.remove(newItem.get());
       money -= delta;
       moneyOnHold += delta;

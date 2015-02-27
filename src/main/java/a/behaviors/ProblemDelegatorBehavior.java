@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import a.agents.TaskAdministrator;
-import util.Log;
 import a.misc.Problem;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
@@ -16,6 +15,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import util.Log;
 
 /**
  * This behavior delegates and sends the trivial sub problems to agents for solving. It also handles auctions and
