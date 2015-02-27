@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import b.MessageListener;
+import b.behaviors.BuyerBehavior;
 import b.behaviors.NegotiatingBehavior;
 import b.misc.Inventory;
 import jade.core.AID;
@@ -151,7 +152,7 @@ public class NegotiatingAgent extends Agent {
   }
 
   public boolean done() {
-    Predicate<MessageListener> notNegotiationBehavior = v -> !(v instanceof NegotiatingBehavior);
+    Predicate<MessageListener> notNegotiationBehavior = v -> !(v instanceof NegotiatingBehavior) && !(v instanceof BuyerBehavior);
     return listeners.size() == 1 || //
            listeners.stream().filter(notNegotiationBehavior).noneMatch(v -> !((Behaviour) v).done());
   }
