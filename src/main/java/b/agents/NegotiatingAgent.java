@@ -3,6 +3,7 @@ package b.agents;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import b.MessageListener;
@@ -10,6 +11,7 @@ import b.behaviors.NegotiatingBehavior;
 import b.misc.Inventory;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.WakerBehaviour;
@@ -38,7 +40,6 @@ public class NegotiatingAgent extends Agent {
   @Override
   protected void setup() {
     listeners = new ArrayList<>();
-
     registerWithYellowPages();
     addBehaviour(createMessageManagerBehavior());
     addBehaviour(createInventoryAquisitionBehavior());
@@ -72,7 +73,7 @@ public class NegotiatingAgent extends Agent {
             }
           });
         } else {
-          listeners.forEach(l -> l.newMessage(msg));
+          listeners.stream().forEach(l -> l.newMessage(msg));
         }
       }
     };
@@ -143,5 +144,15 @@ public class NegotiatingAgent extends Agent {
     }
 
     Log.v(getTag(), "Going down!");
+  }
+
+  public String generateConversationId() {
+    return System.currentTimeMillis() + ":" + Math.random();
+  }
+
+  public boolean done() {
+    Predicate<MessageListener> notNegotiationBehavior = v -> !(v instanceof NegotiatingBehavior);
+    return listeners.size() == 1 || //
+           listeners.stream().filter(notNegotiationBehavior).noneMatch(v -> !((Behaviour) v).done());
   }
 }

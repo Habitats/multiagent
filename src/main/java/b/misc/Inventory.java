@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jade.core.AID;
@@ -18,7 +17,6 @@ public class Inventory {
 
   private List<Item> inventory = new ArrayList<>();
   private List<Item> want = new ArrayList<>();
-  private List<Proposal> proposals = new ArrayList<>();
   private int money = 200;
   private int moneyOnHold = 0;
   private int maxProposalThreshold = 10;
@@ -86,34 +84,39 @@ public class Inventory {
     return want;
   }
 
-  public int getUtilityValue(Proposal p) {
-    Optional<Item> wantedItem = want.stream().filter(p.getProposedItem()::equals).findFirst();
-    if (wantedItem.isPresent()) {
-      return wantedItem.get().getUtilityValue();
-    } else {
-      return p.getProposedItem().getMarketValue();
-    }
-  }
-
   public Optional<Proposal> generateBetterProposal(Proposal oldProposal) {
-    Predicate<Item> isSuitableVendible = i -> //
-        i.getMarketValue() <= oldProposal.getIemToBuy().getMarketValue() && !oldProposal.declinedItems().contains(i);
-    Optional<Item> newItem = vendible().stream().filter(isSuitableVendible).max(Comparator.<Item>naturalOrder());
-    if (newItem.isPresent()) {
-      int value = computeItemValue(oldProposal.declinedItems().size(), oldProposal.getIemToBuy(), newItem.get());
-      Proposal newProposal = new Proposal(newItem.get(), value, oldProposal.getIemToBuy(), //
+    int numDeclined = oldProposal.declinedItems().size();
+    int newDelta = computeItemValue(numDeclined, oldProposal.getIemToBuy(), oldProposal.getProposedItem());
+    // if enough money, keep going
+    if (money > newDelta) {
+      Proposal newProposal = new Proposal(oldProposal.getProposedItem(), newDelta, oldProposal.getIemToBuy(), //
                                           oldProposal.getProposingAgent(), oldProposal.declinedItems());
-      inventory.remove(newItem.get());
-      money -= value;
-      moneyOnHold += value;
+      money -= newDelta;
+      moneyOnHold += newDelta;
       return Optional.of(newProposal);
     }
+    // attempt to sell some other item
+//    else {
+//      Predicate<Item> isSuitableVendible = i -> //
+//          i.getMarketValue() <= oldProposal.getIemToBuy().getMarketValue() && !oldProposal.declinedItems().contains(i);
+//
+//      Optional<Item> newItem = vendible().stream().filter(isSuitableVendible).max(Comparator.<Item>naturalOrder());
+//      if (newItem.isPresent()) {
+//        Proposal newProposal = new Proposal(newItem.get(), newDelta, oldProposal.getIemToBuy(), //
+//                                            oldProposal.getProposingAgent(), oldProposal.declinedItems());
+//        int deltaNewItem = computeItemValue(numDeclined, oldProposal.getIemToBuy(), oldProposal.getProposedItem());
+//        inventory.remove(newItem.get());
+//        money -= deltaNewItem;
+//        moneyOnHold += deltaNewItem;
+//        return Optional.of(newProposal);
+//      }
+//    }
     return Optional.empty();
   }
 
-  private int computeItemValue(int proposedItemCount, Item itemToBuy, Item newItem) {
+  private int computeItemValue(int proposedItemCount, Item itemToBuy, Item proposedItem) {
     double normalizingFactor = (1 + proposedItemCount) / (double) (maxProposalThreshold + 1);
-    int delta = (itemToBuy.getMarketValue() - newItem.getMarketValue());
+    int delta = (itemToBuy.getUtilityValue() - proposedItem.getUtilityValue());
     int value = (int) Math.ceil(delta * normalizingFactor);
     return value;
   }
@@ -128,15 +131,6 @@ public class Inventory {
     money += proposal.getDelta();
     inventory.add(proposal.getProposedItem());
     proposal.declineItem(proposal.getProposedItem());
-  }
-
-  public Optional<Proposal> getBestProposal() {
-    Predicate<Proposal> isSatisfactory = v -> getUtilityValue(v) >= v.getIemToBuy().getUtilityValue();
-    return proposals.stream().filter(isSatisfactory).max((p1, p2) -> getUtilityValue(p1) - getUtilityValue(p2));
-  }
-
-  public void addProposal(Proposal proposal) {
-    proposals.add(proposal);
   }
 
   public int getMoney() {
@@ -158,9 +152,5 @@ public class Inventory {
 
   private String getConcat(List<Item> inventory) {
     return inventory.stream().map(Item::getName).collect(Collectors.joining(", "));
-  }
-
-  public List<Proposal> getProposals() {
-    return proposals;
   }
 }
