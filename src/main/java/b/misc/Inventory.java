@@ -93,6 +93,7 @@ public class Inventory {
                                           oldProposal.getProposingAgent(), oldProposal.declinedItems());
       money -= newDelta;
       moneyOnHold += newDelta;
+      inventory.remove(oldProposal.getProposedItem());
       return Optional.of(newProposal);
     }
     // attempt to sell some other item
