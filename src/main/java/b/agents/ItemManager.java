@@ -25,7 +25,7 @@ public class ItemManager extends Agent {
 
   public static final String SERVICE_NAME = "ITEM_MANAGER";
   private final int NUMBER_OF_AGENTS = 2;
-  private final int inventorySize = NUMBER_OF_AGENTS * 5;
+  private final int inventorySize = NUMBER_OF_AGENTS * 10;
   private final List<Item> inventory = new ArrayList<>();
   private final List<List<Item>> inventorySubLists = new ArrayList<>();
   private final List<List<Item>> wantedSubLists = new ArrayList<>();
@@ -69,7 +69,6 @@ public class ItemManager extends Agent {
           res.addReceiver(msg.getSender());
           send(res);
         }
-        block();
       }
     });
   }

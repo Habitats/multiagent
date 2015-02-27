@@ -29,7 +29,6 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
 
   private State currentState;
   public static final String DELIMITER = "asdasdasd";
-  public static final String LIST_DELIMITER = "lkjlkjlkjlkj";
   private final NegotiatingAgent agent;
   private Inventory inv;
 
@@ -103,14 +102,17 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
   }
 
   private void processInventoryAnnouncement(ACLMessage msg) {
-    Log.v(getTag(), String.format("CFP > Received inventory announcement from %s!", msg.getSender().getLocalName()));
     List<Item> announcedItems = Arrays.asList(msg.getContent().split(DELIMITER)).stream()//
         .map(Item::fromJson).collect(Collectors.toList());
     Optional<Item> wantedItem = inv.want().stream().filter(announcedItems::contains).findFirst();
+//    Log.v(getTag(), String.format("CFP > Received inventory announcement from %s!", msg.getSender().getLocalName()));
     if (wantedItem.isPresent()) {
 
       Optional<Proposal> proposal = inv.generateOffer(wantedItem.get(), getAgent().getAID());
       if (proposal.isPresent()) {
+        Log.v(getTag(), String.format("PROPOSE > Attempting to buy %s from %s! for %s and %d", //
+                                      proposal.get().getIemToBuy().getName(), msg.getSender().getLocalName(),
+                                      proposal.get().getProposedItem().getName(), proposal.get().getDelta()));
         ACLMessage proposalMsg = new ACLMessage(ACLMessage.PROPOSE);
         proposalMsg.addReceiver(msg.getSender());
         proposalMsg.setContent(Proposal.toJson(proposal.get()));
@@ -136,23 +138,31 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
       msg.addReceiver(bestProposal.get().getProposingAgent());
       msg.setContent(Proposal.toJson(bestProposal.get()));
       agent.send(msg);
-
-      ACLMessage rejection = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-      Predicate<AID> isLoser = v -> !v.getName().equals(bestProposal.get().getProposingAgent().getName());
-      inv.getProposals().stream().map(Proposal::getProposingAgent).filter(isLoser).forEach(rejection::addReceiver);
-      agent.send(rejection);
     } else {
       Log.v(getTag(), String.format("Evaluating proposals ... No satisfying proposals. Rejecting ..."));
-      ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-      inv.getProposals().stream().map(Proposal::getProposingAgent).forEach(msg::addReceiver);
-      agent.send(msg);
     }
+
+    Predicate<Proposal> isLoser = v -> //
+        !(bestProposal.isPresent() && v.getProposingAgent().getName()
+            .equals(bestProposal.get().getProposingAgent().getName()));
+
+    inv.getProposals().stream().filter(isLoser).forEach(v -> sendRejection(v));
+    inv.getProposals().clear();
+  }
+
+  private void sendRejection(Proposal v) {
+    ACLMessage rejection = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+    rejection.addReceiver(v.getProposingAgent());
+    rejection.setContent(Proposal.toJson(v));
+    agent.send(rejection);
   }
 
   private void receivedProposal(ACLMessage msg) {
-    Log.v(getTag(), String.format("PROPOSE > Received proposal from %s ...", msg.getSender().getLocalName()));
+    Proposal proposal = Proposal.fromJson(msg.getContent());
+    Log.v(getTag(),
+          String.format("PROPOSE > Received proposal from %s ... %s", msg.getSender().getLocalName(), proposal));
     currentState = State.NEGOTIATING;
-    inv.addProposal(Proposal.fromJson(msg.getContent()));
+    inv.addProposal(proposal);
   }
 
   private void acceptedProposal(ACLMessage msg) {
@@ -164,7 +174,7 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
 
   private void declinedProposal(ACLMessage msg) {
     Proposal proposal = Proposal.fromJson(msg.getContent());
-    Log.v(getTag(), String.format("REJECT_PROPOSAL > My proposal was declined %s", proposal));
+    Log.v(getTag(), String.format("REJECT_PROPOSAL > My proposal was declined!", proposal));
     Optional<Proposal> newProposal = inv.generateBetterProposal(proposal);
     if (newProposal.isPresent()) {
       ACLMessage newProposalMsg = new ACLMessage(ACLMessage.PROPOSE);
@@ -184,6 +194,7 @@ public class NegotiatingBehavior extends Behaviour implements MessageListener {
     boolean empty = inv.want().isEmpty();
     if (empty) {
       Log.v(getTag(), "I'm done! Adios!");
+      agent.doDelete();
     }
     return empty;
   }
