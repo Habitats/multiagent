@@ -51,7 +51,6 @@ public class NegotiatingAgent extends Agent {
         ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
         req.addReceiver(getItemManager());
         send(req);
-
       }
     };
   }

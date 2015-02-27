@@ -13,20 +13,26 @@ public class Item implements Comparable<Item> {
   private final String name;
   private final int value;
   private final int id;
+  private final int marketValue;
 
 
-  public Item(String name, int value) {
+  public Item(String name, int marketValue) {
+    this(name, marketValue, marketValue, ItemManager.generateUniqueId());
+  }
+
+  public Item(String name, int value, int marketValue, int id) {
     this.name = name;
+    this.marketValue = marketValue;
     this.value = value;
-    this.id = ItemManager.generateUniqueId();
+    this.id = id;
   }
 
   public static Item create() {
-    return new Item("sponge", (int) (Math.random() * 100));
+    return new Item("sponge", 1 + (int) (Math.random() * 100));
   }
 
   public static Item create(String name) {
-    return new Item(name, (int) (Math.random() * 100));
+    return new Item(name, (int) Math.ceil(Math.random() * 100));
   }
 
   public static Item create(String name, int value) {
@@ -45,10 +51,6 @@ public class Item implements Comparable<Item> {
     return id;
   }
 
-  public Item get() {
-    return this;
-  }
-
   public String getName() {
     return name;
   }
@@ -65,7 +67,15 @@ public class Item implements Comparable<Item> {
 
   @Override
   public String toString() {
-    return String.format("ID: %3d - Name: %8s - Value: %4d", id, name, value);
+    return String.format("ID: %3d - Name: %9s - Value: %4d - Market Value: %4d", id, name, value, marketValue);
+  }
+
+  public String toStringSimple() {
+    return String.format("%s($%d)", name, marketValue);
+  }
+
+  public int getMarketValue() {
+    return marketValue;
   }
 
   @Override
@@ -73,7 +83,11 @@ public class Item implements Comparable<Item> {
     return value - o.value;
   }
 
-  public int getvalue() {
+  public int getUtilityValue() {
     return value;
+  }
+
+  public static Item wantedCopy(Item item) {
+    return new Item(item.name, (int) Math.ceil(item.value * (1.05 + Math.random() * 0.1)), item.marketValue, item.id);
   }
 }

@@ -101,7 +101,7 @@ public class ItemManager extends Agent {
   }
 
   public List<Item> wantedItems() {
-    return wantedSubLists.remove(0);
+    return wantedSubLists.remove(0).stream().map(Item::wantedCopy).collect(Collectors.toList());
   }
 
   public static int generateUniqueId() {

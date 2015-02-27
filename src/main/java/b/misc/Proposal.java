@@ -35,7 +35,7 @@ public class Proposal {
   }
 
   public boolean evaluate() {
-    return proposedItem.getvalue() + delta - itemToBuy.getvalue() >= 0;
+    return proposedItem.getMarketValue() + delta - itemToBuy.getMarketValue() >= 0;
   }
 
   public int getDelta() {
@@ -68,7 +68,8 @@ public class Proposal {
 
   @Override
   public String toString() {
-    return String.format(" > PROPOSAL > Buy %s for %s and $%d", itemToBuy.getName().toUpperCase(),
-                         proposedItem.getName().toUpperCase(), delta);
+    return String
+        .format(" > PROPOSAL > Buy %s for %s and $%d", itemToBuy.toStringSimple(), proposedItem.toStringSimple(),
+                delta);
   }
 }
