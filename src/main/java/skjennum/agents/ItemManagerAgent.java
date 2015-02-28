@@ -1,4 +1,4 @@
-package b.agents;
+package skjennum.agents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import b.misc.Inventory;
-import b.misc.Item;
+import skjennum.misc.Inventory;
+import skjennum.misc.Item;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -21,11 +21,11 @@ import util.Log;
 /**
  * Created by Patrick on 19.02.2015.
  */
-public class ItemManager extends Agent {
+public class ItemManagerAgent extends Agent {
 
   public static final String SERVICE_NAME = "ITEM_MANAGER";
-  private final int NUMBER_OF_AGENTS = 2;
-  private final int inventorySize = NUMBER_OF_AGENTS * 5;
+  private final int NUMBER_OF_AGENTS = 3;
+  private final int inventorySize = NUMBER_OF_AGENTS * 10;
   private final List<Item> inventory = new ArrayList<>();
   private final List<List<Item>> inventorySubLists = new ArrayList<>();
   private final List<List<Item>> wantedSubLists = new ArrayList<>();
@@ -64,7 +64,7 @@ public class ItemManager extends Agent {
         }
         if (msg.getPerformative() == ACLMessage.REQUEST) {
           ACLMessage res = new ACLMessage(ACLMessage.INFORM);
-          Inventory inv = Inventory.create(aquireItems(), wantedItems());
+          Inventory inv = Inventory.create(acquireInventoryItems(), acquireWantedItems());
           res.setContent(Inventory.toJson(inv));
           res.addReceiver(msg.getSender());
           send(res);
@@ -96,11 +96,11 @@ public class ItemManager extends Agent {
     }
   }
 
-  public List<Item> aquireItems() {
+  public List<Item> acquireInventoryItems() {
     return inventorySubLists.remove(0);
   }
 
-  public List<Item> wantedItems() {
+  public List<Item> acquireWantedItems() {
     return wantedSubLists.remove(0).stream().map(Item::wantedCopy).collect(Collectors.toList());
   }
 
@@ -122,7 +122,7 @@ public class ItemManager extends Agent {
         Log.v(getTag(), "Registered with YellowPages!");
 
         try {
-          DFService.register(ItemManager.this, dfd);
+          DFService.register(ItemManagerAgent.this, dfd);
         } catch (FIPAException fe) {
           fe.printStackTrace();
         }

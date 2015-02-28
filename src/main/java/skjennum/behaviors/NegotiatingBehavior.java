@@ -1,15 +1,15 @@
-package b.behaviors;
+package skjennum.behaviors;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import b.MessageListener;
-import b.agents.NegotiatingAgent;
-import b.misc.Inventory;
-import b.misc.Item;
-import b.misc.Proposal;
+import skjennum.MessageListener;
+import skjennum.agents.NegotiatingAgent;
+import skjennum.misc.Inventory;
+import skjennum.misc.Item;
+import skjennum.misc.Proposal;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -21,7 +21,6 @@ import util.Log;
  * Created by anon on 26.02.2015.
  */
 public class NegotiatingBehavior extends Behaviour implements MessageListener {
-
 
   public enum State {
     READY, WAITING_FOR_PROPOSAL, WAITING_FOR_PROPOSAL_TIMEOUT, DONE, NEGOTIATING;

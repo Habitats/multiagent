@@ -1,9 +1,9 @@
-package b.misc;
+package skjennum.misc;
 
 
 import com.google.gson.Gson;
 
-import b.agents.ItemManager;
+import skjennum.agents.ItemManagerAgent;
 
 /**
  * Created by Patrick on 19.02.2015.
@@ -17,7 +17,7 @@ public class Item implements Comparable<Item> {
 
 
   public Item(String name, int marketValue) {
-    this(name, marketValue, marketValue, ItemManager.generateUniqueId());
+    this(name, marketValue, marketValue, ItemManagerAgent.generateUniqueId());
   }
 
   public Item(String name, int value, int marketValue, int id) {

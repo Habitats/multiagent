@@ -1,4 +1,4 @@
-package b;
+package skjennum;
 
 import jade.lang.acl.ACLMessage;
 

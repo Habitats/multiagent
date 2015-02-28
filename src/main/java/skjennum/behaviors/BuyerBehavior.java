@@ -1,12 +1,12 @@
-package b.behaviors;
+package skjennum.behaviors;
 
 import java.util.Optional;
 
-import b.MessageListener;
-import b.agents.NegotiatingAgent;
-import b.behaviors.NegotiatingBehavior.State;
-import b.misc.Inventory;
-import b.misc.Proposal;
+import skjennum.MessageListener;
+import skjennum.agents.NegotiatingAgent;
+import skjennum.behaviors.NegotiatingBehavior.State;
+import skjennum.misc.Inventory;
+import skjennum.misc.Proposal;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
@@ -41,39 +41,57 @@ public class BuyerBehavior extends Behaviour implements MessageListener {
       Log.v(getTag(), String.format("PROPOSE > Attempting to buy %s from %s! for %s and %d", //
                                     proposal.get().getIemToBuy().getName(), seller.getLocalName(),
                                     proposal.get().getProposedItem().getName(), proposal.get().getDelta()));
-      ACLMessage proposalMsg = new ACLMessage(ACLMessage.PROPOSE);
-      proposalMsg.addReceiver(seller);
-      proposalMsg.setContent(Proposal.toJson(proposal.get()));
-      proposalMsg.setConversationId(conversationId);
-      agent.send(proposalMsg);
+      sendProposal(proposal.get());
     }
   }
 
-  private void acceptedProposal(ACLMessage msg) {
+  @Override
+  public void newMessage(ACLMessage msg) {
+    if (msg.getConversationId().equals(conversationId)) {
+      switch (msg.getPerformative()) {
+        case ACLMessage.REJECT_PROPOSAL:
+          prooisalRejected(msg);
+          break;
+        case ACLMessage.ACCEPT_PROPOSAL:
+          proposalAccepted(msg);
+          break;
+        case ACLMessage.CANCEL:
+          currentState = State.DONE;
+      }
+    }
+  }
+
+  private void sendProposal(Proposal proposal) {
+    ACLMessage proposalMsg = new ACLMessage(ACLMessage.PROPOSE);
+    proposalMsg.addReceiver(seller);
+    proposalMsg.setContent(Proposal.toJson(proposal));
+    proposalMsg.setConversationId(conversationId);
+    agent.send(proposalMsg);
+  }
+
+  private void proposalAccepted(ACLMessage msg) {
     Proposal proposal = Proposal.fromJson(msg.getContent());
     inv.accepted(proposal);
     Log.v(getTag(), String.format("ACCEPT_PROPOSAL > My proposal was accepted! %s %s ", proposal, inv));
     currentState = State.DONE;
   }
 
-  private void declinedProposal(ACLMessage msg) {
+  private void prooisalRejected(ACLMessage msg) {
     Proposal proposal = Proposal.fromJson(msg.getContent());
     Log.v(getTag(), String.format("REJECT_PROPOSAL > My proposal was declined!", proposal));
     inv.declined(proposal);
     Optional<Proposal> newProposal = inv.generateBetterProposal(proposal);
     if (newProposal.isPresent()) {
-      sendNewProposal(msg, newProposal);
+      sendProposal(newProposal.get());
     } else {
       currentState = State.DONE;
     }
   }
 
-  private void sendNewProposal(ACLMessage msg, Optional<Proposal> newProposal) {
-    ACLMessage newProposalMsg = new ACLMessage(ACLMessage.PROPOSE);
-    newProposalMsg.addReceiver(msg.getSender());
-    newProposalMsg.setContent(Proposal.toJson(newProposal.get()));
-    newProposalMsg.setConversationId(conversationId);
-    agent.send(newProposalMsg);
+  @Override
+  public int onEnd() {
+    agent.removeMessageListener(this);
+    return super.onEnd();
   }
 
   @Override
@@ -83,21 +101,5 @@ public class BuyerBehavior extends Behaviour implements MessageListener {
 
   private String getTag() {
     return agent.getTag();
-  }
-
-  @Override
-  public void newMessage(ACLMessage msg) {
-    if (msg.getConversationId().equals(conversationId)) {
-      switch (msg.getPerformative()) {
-        case ACLMessage.REJECT_PROPOSAL:
-          declinedProposal(msg);
-          break;
-        case ACLMessage.ACCEPT_PROPOSAL:
-          acceptedProposal(msg);
-          break;
-        case ACLMessage.CANCEL:
-          currentState = State.DONE;
-      }
-    }
   }
 }

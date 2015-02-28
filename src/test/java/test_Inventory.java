@@ -2,9 +2,9 @@ import org.junit.Test;
 
 import java.util.stream.Stream;
 
-import b.misc.Inventory;
-import b.misc.Item;
-import b.misc.Proposal;
+import skjennum.misc.Inventory;
+import skjennum.misc.Item;
+import skjennum.misc.Proposal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -83,7 +83,7 @@ public class test_Inventory {
 //    inv2.addProposal(p1);
 //    Proposal best = inv2.getBestProposal().get();
 //    assertEquals(best, p1);
-    inv2.declineProposal(p1);
+    inv2.rejectProposal(p1);
 
     inv1.declined(p1);
     assertEquals(inv1.getMoney(), 50);

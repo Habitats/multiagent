@@ -1,4 +1,4 @@
-package b.agents;
+package skjennum.agents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import b.MessageListener;
-import b.behaviors.BuyerBehavior;
-import b.behaviors.NegotiatingBehavior;
-import b.misc.Inventory;
+import skjennum.MessageListener;
+import skjennum.behaviors.BuyerBehavior;
+import skjennum.behaviors.NegotiatingBehavior;
+import skjennum.misc.Inventory;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -29,25 +29,19 @@ import util.Log;
 public class NegotiatingAgent extends Agent {
 
   private static final String ITEM_MANAGER_SERVICE = "ITEM_MANAGER";
-  private List<MessageListener> listeners;
-
-  public void addMessageListener(MessageListener negotiatingBehavior) {
-    listeners.add(negotiatingBehavior);
-  }
-
   private static final String SERVICE_PREFIX = "NEGOTIATION";
   private static final String SERVICE_NAME = "yoloswag";
+  private List<MessageListener> listeners = new ArrayList<>();
 
   @Override
   protected void setup() {
-    listeners = new ArrayList<>();
     registerWithYellowPages();
     addBehaviour(createMessageManagerBehavior());
     addBehaviour(createInventoryAquisitionBehavior());
   }
 
   private WakerBehaviour createInventoryAquisitionBehavior() {
-    return new WakerBehaviour(this, 1000) {
+    return new WakerBehaviour(this, 5000) {
       @Override
       protected void onWake() {
         ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
@@ -151,9 +145,17 @@ public class NegotiatingAgent extends Agent {
     return System.currentTimeMillis() + ":" + Math.random();
   }
 
+  public void addMessageListener(MessageListener messageListener) {
+    listeners.add(messageListener);
+  }
+
+  public void removeMessageListener(MessageListener messageListener) {
+    listeners.remove(messageListener);
+  }
+
   public boolean done() {
-    Predicate<MessageListener> notNegotiationBehavior = v -> !(v instanceof NegotiatingBehavior) && !(v instanceof BuyerBehavior);
-    return listeners.size() == 1 || //
-           listeners.stream().filter(notNegotiationBehavior).noneMatch(v -> !((Behaviour) v).done());
+    Predicate<MessageListener> isRelevant = v -> !(v instanceof NegotiatingBehavior) && !(v instanceof BuyerBehavior);
+    Predicate<MessageListener> isRunning = v -> !((Behaviour) v).done();
+    return listeners.size() == 1 || listeners.stream().filter(isRelevant).noneMatch(isRunning);
   }
 }

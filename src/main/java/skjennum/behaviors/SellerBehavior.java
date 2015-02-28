@@ -1,4 +1,4 @@
-package b.behaviors;
+package skjennum.behaviors;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import b.MessageListener;
-import b.agents.NegotiatingAgent;
-import b.behaviors.NegotiatingBehavior.State;
-import b.misc.Inventory;
-import b.misc.Item;
-import b.misc.Proposal;
+import skjennum.MessageListener;
+import skjennum.agents.NegotiatingAgent;
+import skjennum.behaviors.NegotiatingBehavior.State;
+import skjennum.misc.Inventory;
+import skjennum.misc.Item;
+import skjennum.misc.Proposal;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
@@ -26,9 +26,9 @@ public class SellerBehavior extends Behaviour implements MessageListener {
   private final NegotiatingAgent agent;
   private final Inventory inv;
   private final String conversationId;
-  private State currentState;
   private final int proposalTimeout = 3000;
-  private List<Proposal> proposals = new ArrayList<>();
+  private final List<Proposal> proposals = new ArrayList<>();
+  private State currentState;
 
   public SellerBehavior(NegotiatingAgent agent, Inventory inv, ACLMessage cfp) {
     currentState = State.READY;
@@ -59,6 +59,17 @@ public class SellerBehavior extends Behaviour implements MessageListener {
     }
   }
 
+  @Override
+  public void newMessage(ACLMessage msg) {
+    if (msg.getConversationId().equals(conversationId)) {
+      switch (msg.getPerformative()) {
+        case ACLMessage.PROPOSE:
+          receivedProposal(msg);
+          break;
+      }
+    }
+  }
+
   private void receivedProposal(ACLMessage msg) {
     Proposal proposal = Proposal.fromJson(msg.getContent());
     Log.v(getTag(), String.format("PROPOSE > Received %sproposal from %s ... %s",//
@@ -78,25 +89,21 @@ public class SellerBehavior extends Behaviour implements MessageListener {
   }
 
   private int getUtilityValueOfSelling(Proposal p) {
-    Optional<Item> wantedItem = inv.want().stream().filter(p.getProposedItem()::equals).findFirst();
-    int utility;
-    if (wantedItem.isPresent()) {
-      utility = wantedItem.get().getUtilityValue() + p.getDelta();
+    Optional<Item> proposedItem = inv.want().stream().filter(p.getProposedItem()::equals).findFirst();
+    if (proposedItem.isPresent()) {
+      return proposedItem.get().getUtilityValue() + p.getDelta();
     } else {
-      utility = p.getProposedItem().getMarketValue() + p.getDelta();
+      return p.getProposedItem().getMarketValue() + p.getDelta();
     }
-    return utility;
   }
 
   private int getUtilityValueOfKeeping(Proposal p) {
     Optional<Item> sellingItem = inv.want().stream().filter(p.getIemToBuy()::equals).findFirst();
-    int utility;
     if (sellingItem.isPresent()) {
-      utility = sellingItem.get().getUtilityValue();
+      return sellingItem.get().getUtilityValue();
     } else {
-      utility = p.getIemToBuy().getMarketValue();
+      return p.getIemToBuy().getMarketValue();
     }
-    return utility;
   }
 
   private void evaluateProposals() {
@@ -152,13 +159,9 @@ public class SellerBehavior extends Behaviour implements MessageListener {
   }
 
   @Override
-  public void newMessage(ACLMessage msg) {
-    if (msg.getConversationId().equals(conversationId)) {
-      switch (msg.getPerformative()) {
-        case ACLMessage.PROPOSE:
-          receivedProposal(msg);
-          break;
-      }
-    }
+  public int onEnd() {
+    agent.removeMessageListener(this);
+    return super.onEnd();
   }
+
 }

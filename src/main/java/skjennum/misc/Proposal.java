@@ -1,4 +1,4 @@
-package b.misc;
+package skjennum.misc;
 
 import com.google.gson.Gson;
 

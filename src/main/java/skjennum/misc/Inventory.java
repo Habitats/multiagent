@@ -1,4 +1,4 @@
-package b.misc;
+package skjennum.misc;
 
 import com.google.gson.Gson;
 
@@ -67,7 +67,7 @@ public class Inventory {
     add(proposal.getIemToBuy());
   }
 
-  public void declineProposal(Proposal proposal) {
+  public void rejectProposal(Proposal proposal) {
     add(proposal.getIemToBuy());
   }
 
